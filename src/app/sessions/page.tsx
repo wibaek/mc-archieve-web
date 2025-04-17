@@ -44,46 +44,11 @@ export default function SessionsPage() {
     }
   };
 
-  // 내 세션 목록 가져오기 함수 추가
-  const fetchMySessions = async () => {
-    if (!isAuthenticated || !user) return;
-
-    try {
-      setLoading(true);
-      const response = await session.getMySessions();
-
-      // 각 세션의 멤버 정보를 가져와서 필터링
-      const mySessionsPromises = response.map(async (sessionItem) => {
-        const members = await session.getSessionMembers(sessionItem.id);
-        return members.items.some(
-          (member: SessionMember) => member.userId === user.id
-        )
-          ? sessionItem
-          : null;
-      });
-
-      const mySessions = (await Promise.all(mySessionsPromises)).filter(
-        (session): session is Session => session !== null
-      );
-
-      setSessions((prevSessions) => [...prevSessions, ...mySessions]);
-      setHasMore(response.length > 0);
-    } catch (error) {
-      setError("내 세션 목록을 불러오는 중 오류가 발생했습니다.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // useEffect 수정
   useEffect(() => {
-    if (activeTab === "all") {
-      setSessions([]);
-      fetchSessions();
-      setPage(1);
-    } else if (activeTab === "my" && isAuthenticated) {
-      fetchMySessions();
-    }
+    setSessions([]);
+    fetchSessions();
+    setPage(1);
   }, [activeTab, isAuthenticated]);
 
   // 탭 변경 핸들러 추가

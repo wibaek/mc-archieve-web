@@ -3,7 +3,7 @@
 import type React from "react";
 import { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { apiClient } from "@/services/api";
+import { auth } from "@/services/auth";
 import { hasToken, removeToken } from "@/services/token";
 import type { User } from "@/types/api";
 
@@ -39,15 +39,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         // 토큰이 있는지 확인
         if (typeof window !== "undefined" && hasToken()) {
-          const response = await apiClient.auth.getCurrentUser();
-
-          if (response.success) {
-            setUser(response.data);
-            setIsAuthenticated(true);
-          } else {
-            // 토큰이 유효하지 않은 경우 로그아웃
-            logout();
-          }
+          const user = await auth.getCurrentUser();
+          setUser(user);
+          setIsAuthenticated(true);
         }
       } catch (error) {
         console.error("Failed to initialize auth:", error);
@@ -63,7 +57,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string) => {
     try {
       setError(null);
-      const response = await apiClient.auth.login({ email, password });
+      const response = await auth.login({ email, password });
       setUser(response.user);
       setIsAuthenticated(true);
       return { success: true };
@@ -77,11 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signup = async (email: string, password: string, nickname: string) => {
     try {
       setError(null);
-      const response = await apiClient.auth.signup({
-        email,
-        password,
-        nickname,
-      });
+      const response = await auth.signup({ email, password, nickname });
       setUser(response.user);
       setIsAuthenticated(true);
       return { success: true };
@@ -93,7 +83,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = () => {
-    apiClient.auth.logout();
+    auth.logout();
     setUser(null);
     setIsAuthenticated(false);
     router.push("/login");

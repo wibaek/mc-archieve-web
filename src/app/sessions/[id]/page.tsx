@@ -47,10 +47,6 @@ export default function SessionDetailPage() {
   const { user, isAuthenticated } = useAuth();
   const router = useRouter();
 
-  // 상태 추가
-  const [stories, setStories] = useState<Story[]>([]);
-  const [storiesLoading, setStoriesLoading] = useState(false);
-
   const fetchSession = async () => {
     try {
       setLoading(true);
@@ -96,12 +92,14 @@ export default function SessionDetailPage() {
 
     try {
       setRequestsLoading(true);
-      const requests = await apiClient.sessions.getJoinApplications(session.id);
-      setJoinRequests(requests || []);
+      const requests = await apiClient.sessions.getSessionJoinRequests(
+        session.id
+      );
+      setJoinRequests(requests.items || []);
 
       // 내 참가 요청 확인
       if (user) {
-        const myRequest = requests?.find(
+        const myRequest = requests.items?.find(
           (request) => request.userId === user.id
         );
         setHasJoinRequest(!!myRequest);
@@ -111,23 +109,6 @@ export default function SessionDetailPage() {
       setJoinRequests([]);
     } finally {
       setRequestsLoading(false);
-    }
-  };
-
-  const fetchStories = async () => {
-    if (!session) return;
-
-    try {
-      setStoriesLoading(true);
-      const storiesData = await apiClient.sessions.getSessionStories(
-        session.id
-      );
-      setStories(storiesData || []);
-    } catch (error) {
-      console.error("스토리 목록을 불러오는 중 오류가 발생했습니다.", error);
-      setStories([]);
-    } finally {
-      setStoriesLoading(false);
     }
   };
 
@@ -142,96 +123,45 @@ export default function SessionDetailPage() {
     }
   }, [session, user]);
 
-  useEffect(() => {
-    if (session) {
-      fetchStories();
-    }
-  }, [session]);
-
-  // 참가 요청 처리 함수 수정
-  const handleJoinRequest = async () => {
-    if (!session || !isAuthenticated) return;
-
+  const handleJoinSession = async () => {
+    if (!session) return;
     try {
-      setJoinRequestSending(true);
-      await apiClient.sessions.joinSession(session.id);
-      setHasJoinRequest(true);
-      alert("참가 요청이 성공적으로 전송되었습니다.");
+      setLoading(true);
+      await apiClient.sessions.requestJoinSession(session.id);
+      router.refresh();
     } catch (error) {
-      alert("참가 요청 전송 중 오류가 발생했습니다.");
+      console.error("Failed to join session:", error);
     } finally {
-      setJoinRequestSending(false);
+      setLoading(false);
     }
   };
 
-  // 참가 요청 응답 함수 수정
-  const handleRespondToRequest = async (requestId: string, accept: boolean) => {
-    if (!session || !isAuthenticated) return;
-
+  const handleApproveRequest = async (requestId: string) => {
+    if (!session) return;
     try {
-      if (accept) {
-        await apiClient.sessions.approveJoinRequest(session.id, requestId);
-      } else {
-        await apiClient.sessions.rejectJoinRequest(session.id, requestId);
-      }
-
-      // 요청 목록 새로고침
-      fetchJoinRequests();
-      // 수락한 경우 멤버 목록도 새로고침
-      if (accept) {
-        fetchMembers();
-      }
+      setLoading(true);
+      await apiClient.sessions.acceptJoinRequest(session.id, requestId);
+      router.refresh();
     } catch (error) {
-      alert("요청 처리 중 오류가 발생했습니다.");
-    }
-  };
-
-  const handleRemoveMember = async (userId: string) => {
-    if (!session || !isAuthenticated) return;
-
-    if (!confirm("정말로 이 멤버를 제거하시겠습니까?")) {
-      return;
-    }
-
-    try {
-      await apiClient.sessions.removeMember(session.id, userId);
-      fetchMembers();
-    } catch (error) {
-      alert("멤버 제거 중 오류가 발생했습니다.");
-    }
-  };
-
-  const handleLeaveSession = async () => {
-    if (!session || !isAuthenticated) return;
-
-    if (!confirm("정말로 이 세션을 나가시겠습니까?")) {
-      return;
-    }
-
-    try {
-      await apiClient.sessions.leaveSession(session.id);
-      router.push("/sessions");
-    } catch (error) {
-      alert("세션 나가기 중 오류가 발생했습니다.");
+      console.error("Failed to approve request:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDeleteSession = async () => {
-    if (!session || !isAuthenticated) return;
-
+    if (!session) return;
     if (
-      !confirm(
+      confirm(
         "정말로 이 세션을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다."
       )
     ) {
-      return;
-    }
-
-    try {
-      await apiClient.sessions.deleteSession(session.id);
-      router.push("/sessions");
-    } catch (error) {
-      alert("세션 삭제 중 오류가 발생했습니다.");
+      try {
+        await apiClient.sessions.deleteSession(session.id);
+        router.push("/sessions");
+      } catch (error) {
+        console.error("Failed to delete session:", error);
+      }
     }
   };
 
@@ -313,16 +243,6 @@ export default function SessionDetailPage() {
                   </Button>
                 </>
               )}
-              {isMember && !isOwner && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleLeaveSession}
-                >
-                  <LogOut className="h-4 w-4 mr-1" />
-                  나가기
-                </Button>
-              )}
             </div>
           </CardHeader>
           <CardContent>
@@ -372,7 +292,7 @@ export default function SessionDetailPage() {
                   disabled={joinRequestSending}
                 />
                 <Button
-                  onClick={handleJoinRequest}
+                  onClick={handleJoinSession}
                   className="w-full bg-[#33691E] hover:bg-[#1B5E20]"
                   disabled={joinRequestSending}
                 >
@@ -408,7 +328,6 @@ export default function SessionDetailPage() {
           <TabsList className="mb-6">
             <TabsTrigger value="members">멤버</TabsTrigger>
             {isOwner && <TabsTrigger value="requests">참가 요청</TabsTrigger>}
-            <TabsTrigger value="stories">스토리</TabsTrigger>
           </TabsList>
 
           <TabsContent value="members">
@@ -447,16 +366,6 @@ export default function SessionDetailPage() {
                             </p>
                           </div>
                         </div>
-                        {isOwner && member.userId !== user?.id && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleRemoveMember(member.userId)}
-                            className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        )}
                       </div>
                     ))}
                   </div>
@@ -503,9 +412,7 @@ export default function SessionDetailPage() {
                                 variant="outline"
                                 size="sm"
                                 className="bg-green-50 text-green-600 hover:bg-green-100 border-green-200"
-                                onClick={() =>
-                                  handleRespondToRequest(request.id, true)
-                                }
+                                onClick={() => handleApproveRequest(request.id)}
                               >
                                 <Check className="h-4 w-4 mr-1" />
                                 수락
@@ -515,7 +422,10 @@ export default function SessionDetailPage() {
                                 size="sm"
                                 className="bg-red-50 text-red-600 hover:bg-red-100 border-red-200"
                                 onClick={() =>
-                                  handleRespondToRequest(request.id, false)
+                                  apiClient.sessions.rejectJoinRequest(
+                                    session.id,
+                                    request.id
+                                  )
                                 }
                               >
                                 <X className="h-4 w-4 mr-1" />
@@ -538,69 +448,6 @@ export default function SessionDetailPage() {
               </Card>
             </TabsContent>
           )}
-          <TabsContent value="stories">
-            <Card className="border-0 shadow-sm">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-lg font-semibold text-[#5D4037]">
-                  스토리
-                </CardTitle>
-                {isMember && (
-                  <Button asChild className="bg-[#33691E] hover:bg-[#1B5E20]">
-                    <Link href={`/sessions/${session.id}/stories/create`}>
-                      <Plus className="mr-2 h-4 w-4" />새 스토리 작성
-                    </Link>
-                  </Button>
-                )}
-              </CardHeader>
-              <CardContent>
-                {storiesLoading ? (
-                  <div className="flex justify-center py-8">
-                    <Loader2 className="h-6 w-6 animate-spin text-[#5D4037]" />
-                  </div>
-                ) : stories.length === 0 ? (
-                  <div className="text-center py-8">
-                    <p className="text-gray-500">아직 스토리가 없습니다.</p>
-                    {isMember && (
-                      <Button
-                        asChild
-                        className="mt-4 bg-[#33691E] hover:bg-[#1B5E20]"
-                      >
-                        <Link href={`/sessions/${session.id}/stories/create`}>
-                          <Plus className="mr-2 h-4 w-4" />첫 스토리 작성하기
-                        </Link>
-                      </Button>
-                    )}
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {stories.map((story) => (
-                      <Link
-                        href={`/sessions/${session.id}/stories/${story.id}`}
-                        key={story.id}
-                      >
-                        <div className="p-4 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors">
-                          <div className="flex justify-between items-start mb-2">
-                            <h3 className="font-medium text-[#5D4037]">
-                              {story.title}
-                            </h3>
-                            <span className="text-xs text-gray-500">
-                              {formatDate(story.createdAt)}
-                            </span>
-                          </div>
-                          <p className="text-sm text-[#33691E] line-clamp-2">
-                            {story.content}
-                          </p>
-                          <div className="mt-2 text-xs text-gray-500">
-                            작성자: {story.user?.username || "알 수 없음"}
-                          </div>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
         </Tabs>
       </div>
     </div>

@@ -85,12 +85,19 @@ export interface SessionMember {
   joinedAt: string;
 }
 
+export enum SessionJoinRequestStatus {
+  PENDING = "PENDING",
+  ACCEPTED = "ACCEPTED",
+  REJECTED = "REJECTED",
+}
+
 export interface SessionJoinRequest {
   id: string;
   sessionId: string;
   userId: string;
   user: User;
-  status: "PENDING" | "APPROVED" | "REJECTED";
+  status: SessionJoinRequestStatus;
+  message?: string;
   createdAt: string;
   updatedAt: string;
 }

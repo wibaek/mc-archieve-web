@@ -51,17 +51,13 @@ export function useAuth() {
     }
   };
 
-  const register = async (
-    username: string,
-    email: string,
-    password: string
-  ) => {
+  const signup = async (email: string, password: string, nickname: string) => {
     try {
       setLoading(true);
-      const authData = await apiClient.auth.register({
-        username,
+      const authData = await apiClient.auth.signup({
         email,
         password,
+        nickname,
       });
       setUser(authData.user);
       return { success: true };
@@ -84,7 +80,7 @@ export function useAuth() {
     loading,
     error,
     login,
-    register,
+    signup,
     logout,
     isAuthenticated: !!user,
   };

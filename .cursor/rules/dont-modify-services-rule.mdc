@@ -1,0 +1,12 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# Your rule content
+
+
+- src/app/services는 API가 적혀있는 부분으로, 임의로 변경하지 말고 해당 API에 따라서 설계하고 코드를 작성할 것.
+
+- src/app/types 역시 API의 반환 타입이 적혀있으므로, 수정시에 주의하거나 동의를 구할 것.

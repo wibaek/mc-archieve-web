@@ -71,37 +71,6 @@ export const session = {
     }
   },
 
-  // 세션 업데이트
-  updateSession: async (
-    sessionId: string,
-    data: UpdateSessionRequest
-  ): Promise<Session> => {
-    try {
-      const response = await axiosInstance.put<Session>(
-        `/v1/sessions/${sessionId}`,
-        data
-      );
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
-        return error.response.data as Session;
-      }
-      throw error;
-    }
-  },
-
-  // 세션 삭제
-  deleteSession: async (sessionId: string): Promise<void> => {
-    try {
-      await axiosInstance.delete(`/v1/sessions/${sessionId}`);
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
-        throw error;
-      }
-      throw error;
-    }
-  },
-
   // 세션 멤버 목록 조회
   getSessionMembers: async (
     sessionId: string

@@ -34,6 +34,11 @@ export interface User {
   updatedAt: string;
 }
 
+export interface Profile {
+  nickname: string;
+  profileImageUrl: string;
+}
+
 export interface UserProfile extends User {
   bio?: string;
   postCount: number;

@@ -26,12 +26,8 @@ export interface AuthResponse {
 
 // 사용자 관련 타입
 export interface User {
-  id: string;
-  username: string;
   email: string;
   profileImage?: string;
-  createdAt: string;
-  updatedAt: string;
 }
 
 export interface Profile {

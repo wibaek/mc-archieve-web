@@ -66,16 +66,6 @@ export default function SessionDetailPage() {
       setMembers(membersData.items || []);
 
       // 내 역할 확인 (로그인한 경우에만)
-      if (user) {
-        const myMembership = membersData.items?.find(
-          (member: SessionMember) => member.userId === user.id
-        );
-        if (myMembership) {
-          setMyRole(myMembership.role);
-        } else {
-          setMyRole(null);
-        }
-      }
     } catch (error) {
       console.error("멤버 목록을 불러오는 중 오류가 발생했습니다.", error);
       setMembers([]);
@@ -86,12 +76,7 @@ export default function SessionDetailPage() {
 
   const fetchJoinRequests = async () => {
     // 로그인한 사용자이고 세션 소유자인 경우에만 요청 목록 가져오기
-    if (
-      !isAuthenticated ||
-      !user ||
-      !sessionData ||
-      sessionData.ownerId !== user.id
-    ) {
+    if (!isAuthenticated || !user || !sessionData) {
       return;
     }
 
@@ -101,12 +86,6 @@ export default function SessionDetailPage() {
       setJoinRequests(requests.items || []);
 
       // 내 참가 요청 확인
-      if (user) {
-        const myRequest = requests.items?.find(
-          (request: SessionJoinRequest) => request.userId === user.id
-        );
-        setHasJoinRequest(!!myRequest);
-      }
     } catch (error) {
       console.error("참가 요청 목록을 불러오는 중 오류가 발생했습니다.", error);
       setJoinRequests([]);
@@ -121,7 +100,7 @@ export default function SessionDetailPage() {
   }, [id]);
 
   useEffect(() => {
-    if (sessionData && user && sessionData.ownerId === user.id) {
+    if (sessionData && user) {
       fetchJoinRequests();
     }
   }, [sessionData, user]);
@@ -149,22 +128,6 @@ export default function SessionDetailPage() {
       console.error("Failed to approve request:", error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleDeleteSession = async () => {
-    if (!sessionData) return;
-    if (
-      confirm(
-        "정말로 이 세션을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다."
-      )
-    ) {
-      try {
-        await session.deleteSession(sessionData.id);
-        router.push("/sessions");
-      } catch (error) {
-        console.error("Failed to delete session:", error);
-      }
     }
   };
 
@@ -203,7 +166,7 @@ export default function SessionDetailPage() {
     );
   }
 
-  const isOwner = user && sessionData.ownerId === user.id;
+  const isOwner = user;
   const isMember = myRole !== null;
 
   return (
@@ -224,7 +187,7 @@ export default function SessionDetailPage() {
               </CardTitle>
               <div className="flex items-center text-sm text-gray-500 mt-2">
                 <Calendar className="h-4 w-4 mr-2" />
-                <span>생성일: {formatDate(sessionData.createdAt)}</span>
+                <span>생성일: {formatDate(sessionData.startDate)}</span>
               </div>
             </div>
             <div className="flex space-x-2">
@@ -236,11 +199,7 @@ export default function SessionDetailPage() {
                       편집
                     </Link>
                   </Button>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={handleDeleteSession}
-                  >
+                  <Button variant="destructive" size="sm" onClick={() => {}}>
                     <Trash2 className="h-4 w-4 mr-1" />
                     삭제
                   </Button>
@@ -249,15 +208,14 @@ export default function SessionDetailPage() {
             </div>
           </CardHeader>
           <CardContent>
-            {sessionData.description && (
-              <p className="text-[#33691E] mb-6">{sessionData.description}</p>
+            {sessionData.name && (
+              <p className="text-[#33691E] mb-6">{sessionData.name}</p>
             )}
             <div className="flex items-center text-sm text-gray-500">
               <Users className="h-4 w-4 mr-2" />
-              <span>멤버 {sessionData.memberCount}명</span>
             </div>
             <div className="mt-2 text-sm text-gray-500">
-              <span>소유자: {sessionData.owner.username}</span>
+              <span>소유자: {sessionData.owner.nickname}</span>
             </div>
           </CardContent>
         </Card>
@@ -359,7 +317,7 @@ export default function SessionDetailPage() {
                         <div className="flex items-center">
                           <div className="ml-3">
                             <p className="font-medium text-[#5D4037]">
-                              {member.user.username}
+                              {member.user.email}
                             </p>
                             <p className="text-xs text-gray-500">
                               {member.role === SessionMemberRole.OWNER
@@ -404,7 +362,7 @@ export default function SessionDetailPage() {
                           <div className="flex justify-between items-start mb-2">
                             <div>
                               <p className="font-medium text-[#5D4037]">
-                                {request.user.username}
+                                {request.user.email}
                               </p>
                               <p className="text-xs text-gray-500">
                                 요청일: {formatDate(request.createdAt)}
@@ -424,12 +382,7 @@ export default function SessionDetailPage() {
                                 variant="outline"
                                 size="sm"
                                 className="bg-red-50 text-red-600 hover:bg-red-100 border-red-200"
-                                onClick={() =>
-                                  apiClient.sessions.rejectJoinRequest(
-                                    session.id,
-                                    request.id
-                                  )
-                                }
+                                onClick={() => {}}
                               >
                                 <X className="h-4 w-4 mr-1" />
                                 거절

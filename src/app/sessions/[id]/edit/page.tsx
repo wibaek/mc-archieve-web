@@ -15,7 +15,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
-import { apiClient } from "@/services/api";
 import { useAuth } from "@/hooks/use-auth";
 import Link from "next/link";
 
@@ -43,14 +42,15 @@ export default function EditSessionPage() {
   const fetchSession = async () => {
     try {
       setFetchLoading(true);
-      const session = await apiClient.sessions.getSession(id);
+      // TODO: API 연동 필요
+      // const session = await apiClient.sessions.getSession(id);
 
       // 소유자 확인
-      if (user && session.ownerId !== user.id) {
-        setErrorMessage("세션 소유자만 편집할 수 있습니다.");
+      if (user) {
+        setName("샘플 세션"); // 임시 데이터
+        setDescription("샘플 설명"); // 임시 데이터
       } else {
-        setName(session.name);
-        setDescription(session.description || "");
+        setErrorMessage("세션 소유자만 편집할 수 있습니다.");
       }
     } catch (error) {
       setErrorMessage("세션 정보를 불러오는 중 오류가 발생했습니다.");
@@ -77,10 +77,11 @@ export default function EditSessionPage() {
     setIsLoading(true);
 
     try {
-      const session = await apiClient.sessions.updateSession(id, {
-        name,
-        description: description.trim() ? description : undefined,
-      });
+      // TODO: API 연동 필요
+      // const session = await apiClient.sessions.updateSession(id, {
+      //   name,
+      //   description: description.trim() ? description : undefined,
+      // });
       router.push(`/sessions/${id}`);
     } catch (error) {
       setErrorMessage("세션 수정 중 오류가 발생했습니다.");

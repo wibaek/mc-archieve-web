@@ -5,7 +5,6 @@ import type {
   SessionJoinRequest,
   SessionMember,
   Story,
-  UpdateSessionRequest,
   UpdateStoryRequest,
 } from "@/types/session";
 import axiosInstance from "./axios-config";

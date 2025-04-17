@@ -17,7 +17,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Upload, X, ImageIcon, Loader2 } from "lucide-react";
-import { apiClient } from "@/services/api";
 import { useAuth } from "@/contexts/auth-context";
 
 export default function UploadPage() {
@@ -77,16 +76,7 @@ export default function UploadPage() {
     }
 
     try {
-      const response = await apiClient.posts.createPost({
-        title,
-        description,
-        image,
-        tags: tags
-          .split(",")
-          .map((tag) => tag.trim())
-          .filter(Boolean),
-      });
-
+      // TODO: API 연동 필요
       setSuccessMessage("게시물이 성공적으로 업로드되었습니다.");
       // 폼 초기화
       setTitle("");

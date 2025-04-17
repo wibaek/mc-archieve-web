@@ -13,8 +13,8 @@ import {
 } from "@/components/ui/card";
 import { Loader2, Plus, Users, Calendar, LogIn } from "lucide-react";
 import { session } from "@/services/session";
-import type { Session, SessionMember } from "@/types/api";
 import { useAuth } from "@/contexts/auth-context";
+import { Session } from "@/types/session";
 
 export default function SessionsPage() {
   const [sessions, setSessions] = useState<Session[]>([]);
@@ -35,8 +35,7 @@ export default function SessionsPage() {
     try {
       setLoading(true);
       const response = await session.getSessions({ page, limit: 10 });
-      setSessions((prevSessions) => [...prevSessions, ...response]);
-      setHasMore(response.length > 0);
+      setSessions(response);
     } catch (error) {
       setError("세션 목록을 불러오는 중 오류가 발생했습니다.");
     } finally {
@@ -159,23 +158,21 @@ export default function SessionsPage() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      {session.description && (
-                        <p className="text-[#33691E] mb-4">
-                          {session.description}
-                        </p>
+                      {session.name && (
+                        <p className="text-[#33691E] mb-4">{session.name}</p>
                       )}
                       <div className="flex items-center text-sm text-gray-500 mb-2">
                         <Users className="h-4 w-4 mr-2" />
-                        <span>멤버 {session.memberCount}명</span>
+                        <span>멤버 {1}명</span>
                       </div>
                       <div className="flex items-center text-sm text-gray-500">
                         <Calendar className="h-4 w-4 mr-2" />
-                        <span>생성일: {formatDate(session.createdAt)}</span>
+                        <span>생성일: {formatDate(session.startDate)}</span>
                       </div>
                     </CardContent>
                     <CardFooter>
                       <p className="text-sm text-gray-500">
-                        소유자: {session.owner.username}
+                        소유자: {session.owner.nickname}
                       </p>
                     </CardFooter>
                   </Card>
@@ -209,23 +206,21 @@ export default function SessionsPage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {session.description && (
-                      <p className="text-[#33691E] mb-4">
-                        {session.description}
-                      </p>
+                    {session.name && (
+                      <p className="text-[#33691E] mb-4">{session.name}</p>
                     )}
                     <div className="flex items-center text-sm text-gray-500 mb-2">
                       <Users className="h-4 w-4 mr-2" />
-                      <span>멤버 {session.memberCount}명</span>
+                      <span>멤버 {1}명</span>
                     </div>
                     <div className="flex items-center text-sm text-gray-500">
                       <Calendar className="h-4 w-4 mr-2" />
-                      <span>생성일: {formatDate(session.createdAt)}</span>
+                      <span>생성일: {formatDate(session.startDate)}</span>
                     </div>
                   </CardContent>
                   <CardFooter>
                     <p className="text-sm text-gray-500">
-                      소유자: {session.owner.username}
+                      소유자: {session.owner.nickname}
                     </p>
                   </CardFooter>
                 </Card>

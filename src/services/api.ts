@@ -11,6 +11,11 @@ import type {
   Comment,
   CreateCommentRequest,
   UpdateCommentRequest,
+  Session,
+  CreateSessionRequest,
+  UpdateSessionRequest,
+  SessionMember,
+  SessionJoinRequest,
 } from "@/types/api";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
@@ -29,8 +34,85 @@ const apiClient = {
       localStorage.removeItem("token");
     },
     getCurrentUser: async (): Promise<User> => {
-      const response = await axios.get(`${API_URL}/auth/me`);
+      const response = await axios.get(`${API_URL}/v1/auth/me`);
       return response.data;
+    },
+  },
+  sessions: {
+    getSessions: async (params?: {
+      page?: number;
+      limit?: number;
+    }): Promise<Session[]> => {
+      const response = await axios.get(`${API_URL}/v1/sessions`, { params });
+      return response.data;
+    },
+    getMySessions: async (): Promise<Session[]> => {
+      const response = await axios.get(`${API_URL}/v1/sessions/my`);
+      return response.data;
+    },
+    getSession: async (sessionId: string): Promise<Session> => {
+      const response = await axios.get(`${API_URL}/v1/sessions/${sessionId}`);
+      return response.data;
+    },
+    createSession: async (data: CreateSessionRequest): Promise<Session> => {
+      const response = await axios.post(`${API_URL}/v1/sessions`, data);
+      return response.data;
+    },
+    updateSession: async (
+      sessionId: string,
+      data: UpdateSessionRequest
+    ): Promise<Session> => {
+      const response = await axios.put(
+        `${API_URL}/v1/sessions/${sessionId}`,
+        data
+      );
+      return response.data;
+    },
+    deleteSession: async (sessionId: string): Promise<void> => {
+      await axios.delete(`${API_URL}/v1/sessions/${sessionId}`);
+    },
+    getSessionMembers: async (
+      sessionId: string
+    ): Promise<{ items: SessionMember[] }> => {
+      const response = await axios.get(
+        `${API_URL}/v1/sessions/${sessionId}/members`
+      );
+      return response.data;
+    },
+    joinSession: async (sessionId: string): Promise<void> => {
+      await axios.post(`${API_URL}/v1/sessions/${sessionId}/join`);
+    },
+    getJoinApplications: async (
+      sessionId: string
+    ): Promise<SessionJoinRequest[]> => {
+      const response = await axios.get(
+        `${API_URL}/v1/sessions/${sessionId}/join-applications`
+      );
+      return response.data.applications;
+    },
+    approveJoinRequest: async (
+      sessionId: string,
+      applicationId: string
+    ): Promise<void> => {
+      await axios.post(
+        `${API_URL}/v1/sessions/${sessionId}/join-applications/${applicationId}/approve`
+      );
+    },
+    rejectJoinRequest: async (
+      sessionId: string,
+      applicationId: string
+    ): Promise<void> => {
+      await axios.post(
+        `${API_URL}/v1/sessions/${sessionId}/join-applications/${applicationId}/reject`
+      );
+    },
+    removeMember: async (sessionId: string, userId: string): Promise<void> => {
+      await axios.delete(
+        `${API_URL}/v1/sessions/${sessionId}/members/${userId}`
+      );
+    },
+    leaveSession: async (sessionId: string): Promise<void> => {
+      await axios.delete(`${API_URL}/v1/sessions/${sessionId}/leave`);
     },
   },
   posts: {

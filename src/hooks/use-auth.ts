@@ -43,9 +43,11 @@ export function useAuth() {
       const authData = await apiClient.auth.login({ email, password });
       setUser(authData.user);
       return { success: true };
-    } catch (err) {
-      setError("로그인 중 오류가 발생했습니다.");
-      return { success: false, message: "로그인 중 오류가 발생했습니다." };
+    } catch (err: any) {
+      const errorMessage =
+        err.response?.data?.message || "로그인 중 오류가 발생했습니다.";
+      setError(errorMessage);
+      return { success: false, message: errorMessage };
     } finally {
       setLoading(false);
     }
@@ -61,9 +63,11 @@ export function useAuth() {
       });
       setUser(authData.user);
       return { success: true };
-    } catch (err) {
-      setError("회원가입 중 오류가 발생했습니다.");
-      return { success: false, message: "회원가입 중 오류가 발생했습니다." };
+    } catch (err: any) {
+      const errorMessage =
+        err.response?.data?.message || "회원가입 중 오류가 발생했습니다.";
+      setError(errorMessage);
+      return { success: false, message: errorMessage };
     } finally {
       setLoading(false);
     }

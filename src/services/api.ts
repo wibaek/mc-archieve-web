@@ -93,19 +93,19 @@ export const sessions = {
     page: number = 1,
     limit: number = 10
   ): Promise<PaginatedResponse<Session>> => {
-    const response = await api.get<PaginatedResponse<Session>>("/sessions", {
+    const response = await api.get<PaginatedResponse<Session>>("/v1/sessions", {
       params: { page, limit },
     });
     return response.data;
   },
 
   getSession: async (sessionId: string): Promise<Session> => {
-    const response = await api.get<Session>(`/sessions/${sessionId}`);
+    const response = await api.get<Session>(`/v1/sessions/${sessionId}`);
     return response.data;
   },
 
   createSession: async (data: CreateSessionRequest): Promise<Session> => {
-    const response = await api.post<Session>("/sessions", data);
+    const response = await api.post<Session>("/v1/sessions", data);
     return response.data;
   },
 
@@ -113,12 +113,12 @@ export const sessions = {
     sessionId: string,
     data: UpdateSessionRequest
   ): Promise<Session> => {
-    const response = await api.put<Session>(`/sessions/${sessionId}`, data);
+    const response = await api.put<Session>(`/v1/sessions/${sessionId}`, data);
     return response.data;
   },
 
   deleteSession: async (sessionId: string): Promise<void> => {
-    await api.delete(`/sessions/${sessionId}`);
+    await api.delete(`/v1/sessions/${sessionId}`);
   },
 
   getSessionMembers: async (
@@ -127,7 +127,7 @@ export const sessions = {
     limit: number = 10
   ): Promise<PaginatedResponse<SessionMember>> => {
     const response = await api.get<PaginatedResponse<SessionMember>>(
-      `/sessions/${sessionId}/members`,
+      `/v1/sessions/${sessionId}/members`,
       { params: { page, limit } }
     );
     return response.data;
@@ -139,7 +139,7 @@ export const sessions = {
     limit: number = 10
   ): Promise<PaginatedResponse<SessionJoinRequest>> => {
     const response = await api.get<PaginatedResponse<SessionJoinRequest>>(
-      `/sessions/${sessionId}/join-requests`,
+      `/v1/sessions/${sessionId}/join-requests`,
       { params: { page, limit } }
     );
     return response.data;
@@ -150,7 +150,7 @@ export const sessions = {
     message?: string
   ): Promise<SessionJoinRequest> => {
     const response = await api.post<SessionJoinRequest>(
-      `/sessions/${sessionId}/join-requests`,
+      `/v1/sessions/${sessionId}/join-requests`,
       { message }
     );
     return response.data;
@@ -160,110 +160,18 @@ export const sessions = {
     sessionId: string,
     requestId: string
   ): Promise<void> => {
-    await api.post(`/sessions/${sessionId}/join-requests/${requestId}/accept`);
+    await api.post(
+      `/v1/sessions/${sessionId}/join-requests/${requestId}/accept`
+    );
   },
 
   rejectJoinRequest: async (
     sessionId: string,
     requestId: string
   ): Promise<void> => {
-    await api.post(`/sessions/${sessionId}/join-requests/${requestId}/reject`);
-  },
-};
-
-// 게시물 관련 API
-export const posts = {
-  getPosts: async (
-    page: number = 1,
-    limit: number = 10
-  ): Promise<PaginatedResponse<Post>> => {
-    const response = await api.get<PaginatedResponse<Post>>("/posts", {
-      params: { page, limit },
-    });
-    return response.data;
-  },
-
-  getPost: async (postId: string): Promise<Post> => {
-    const response = await api.get<Post>(`/posts/${postId}`);
-    return response.data;
-  },
-
-  createPost: async (data: CreatePostRequest): Promise<Post> => {
-    const formData = new FormData();
-    formData.append("title", data.title);
-    if (data.description) {
-      formData.append("description", data.description);
-    }
-    formData.append("image", data.image);
-    if (data.tags) {
-      formData.append("tags", JSON.stringify(data.tags));
-    }
-
-    const response = await api.post<Post>("/posts", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
-    return response.data;
-  },
-
-  updatePost: async (
-    postId: string,
-    data: UpdatePostRequest
-  ): Promise<Post> => {
-    const response = await api.put<Post>(`/posts/${postId}`, data);
-    return response.data;
-  },
-
-  deletePost: async (postId: string): Promise<void> => {
-    await api.delete(`/posts/${postId}`);
-  },
-
-  likePost: async (postId: string): Promise<void> => {
-    await api.post(`/posts/${postId}/like`);
-  },
-
-  unlikePost: async (postId: string): Promise<void> => {
-    await api.delete(`/posts/${postId}/like`);
-  },
-};
-
-// 댓글 관련 API
-export const comments = {
-  getComments: async (
-    postId: string,
-    page: number = 1,
-    limit: number = 10
-  ): Promise<PaginatedResponse<Comment>> => {
-    const response = await api.get<PaginatedResponse<Comment>>(
-      `/posts/${postId}/comments`,
-      { params: { page, limit } }
+    await api.post(
+      `/v1/sessions/${sessionId}/join-requests/${requestId}/reject`
     );
-    return response.data;
-  },
-
-  createComment: async (
-    postId: string,
-    data: CreateCommentRequest
-  ): Promise<Comment> => {
-    const response = await api.post<Comment>(`/posts/${postId}/comments`, data);
-    return response.data;
-  },
-
-  updateComment: async (
-    postId: string,
-    commentId: string,
-    data: UpdateCommentRequest
-  ): Promise<Comment> => {
-    const response = await api.put<Comment>(
-      `/posts/${postId}/comments/${commentId}`,
-      data
-    );
-    return response.data;
-  },
-
-  deleteComment: async (postId: string, commentId: string): Promise<void> => {
-    await api.delete(`/posts/${postId}/comments/${commentId}`);
   },
 };
 
@@ -272,8 +180,6 @@ export const apiClient = {
   auth,
   users,
   sessions,
-  posts,
-  comments,
 };
 
 export default api;

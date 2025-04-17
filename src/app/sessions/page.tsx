@@ -12,8 +12,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Loader2, Plus, Users, Calendar, LogIn } from "lucide-react";
-import { apiClient } from "@/services/api";
-import type { Session } from "@/types/session";
+import { session } from "@/services/session";
+import type { Session, SessionMember } from "@/types/api";
 import { useAuth } from "@/contexts/auth-context";
 
 export default function SessionsPage() {
@@ -34,11 +34,9 @@ export default function SessionsPage() {
   const fetchSessions = async () => {
     try {
       setLoading(true);
-      const response = await apiClient.sessions.getSessions(page, 10);
-      setSessions((prevSessions) => [...prevSessions, ...response.items]);
-      setHasMore(
-        response.items.length > 0 && response.page < response.totalPages
-      );
+      const response = await session.getSessions({ page, limit: 10 });
+      setSessions((prevSessions) => [...prevSessions, ...response]);
+      setHasMore(response.length > 0);
     } catch (error) {
       setError("세션 목록을 불러오는 중 오류가 발생했습니다.");
     } finally {
@@ -52,13 +50,15 @@ export default function SessionsPage() {
 
     try {
       setLoading(true);
-      const response = await apiClient.sessions.getSessions(page, 10);
+      const response = await session.getMySessions();
 
       // 각 세션의 멤버 정보를 가져와서 필터링
-      const mySessionsPromises = response.items.map(async (session) => {
-        const members = await apiClient.sessions.getSessionMembers(session.id);
-        return members.items.some((member) => member.userId === user.id)
-          ? session
+      const mySessionsPromises = response.map(async (sessionItem) => {
+        const members = await session.getSessionMembers(sessionItem.id);
+        return members.items.some(
+          (member: SessionMember) => member.userId === user.id
+        )
+          ? sessionItem
           : null;
       });
 
@@ -67,9 +67,7 @@ export default function SessionsPage() {
       );
 
       setSessions((prevSessions) => [...prevSessions, ...mySessions]);
-      setHasMore(
-        response.items.length > 0 && response.page < response.totalPages
-      );
+      setHasMore(response.length > 0);
     } catch (error) {
       setError("내 세션 목록을 불러오는 중 오류가 발생했습니다.");
     } finally {

@@ -1,98 +1,93 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Loader2, Plus, Users, Calendar, LogIn } from "lucide-react"
-import { apiClient } from "@/services/api"
-import type { Session } from "@/types/session"
-import { useAuth } from "@/contexts/auth-context"
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Loader2, Plus, Users, Calendar, LogIn } from "lucide-react";
+import { apiClient } from "@/services/api";
+import type { Session } from "@/types/session";
+import { useAuth } from "@/contexts/auth-context";
 
 export default function SessionsPage() {
-  const [sessions, setSessions] = useState<Session[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [page, setPage] = useState(1)
-  const [hasMore, setHasMore] = useState(true)
-  const { isAuthenticated } = useAuth()
-  const router = useRouter()
+  const [sessions, setSessions] = useState<Session[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const { isAuthenticated } = useAuth();
+  const router = useRouter();
 
   // 상태 추가
-  const [activeTab, setActiveTab] = useState<"all" | "my">("all")
-  const [mySessions, setMySessions] = useState<Session[]>([])
-  const [mySessionsLoading, setMySessionsLoading] = useState(false)
+  const [activeTab, setActiveTab] = useState<"all" | "my">("all");
+  const [mySessions, setMySessions] = useState<Session[]>([]);
+  const [mySessionsLoading, setMySessionsLoading] = useState(false);
 
   // 세션 목록 가져오기 함수
   const fetchSessions = async (page: number) => {
     try {
-      setLoading(true)
-      const response = await apiClient.sessions.getSessions({ page })
-
-      if (response.success) {
-        setSessions((prevSessions) => [...prevSessions, ...response.data])
-        setHasMore(response.data.length > 0)
-        setPage(page)
-      } else {
-        setError("세션 목록을 불러오는 중 오류가 발생했습니다.")
-      }
+      setLoading(true);
+      const sessions = await apiClient.sessions.getSessions();
+      setSessions((prevSessions) => [...prevSessions, ...sessions]);
+      setHasMore(sessions.length > 0);
     } catch (error) {
-      setError("세션 목록을 불러오는 중 오류가 발생했습니다.")
+      setError("세션 목록을 불러오는 중 오류가 발생했습니다.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   // 내 세션 목록 가져오기 함수 추가
   const fetchMySessions = async () => {
-    if (!isAuthenticated) return
+    if (!isAuthenticated) return;
 
     try {
-      setMySessionsLoading(true)
-      const response = await apiClient.sessions.getMySessions()
-
-      if (response.success) {
-        setMySessions(response.data)
-      } else {
-        setError("내 세션 목록을 불러오는 중 오류가 발생했습니다.")
-      }
+      setMySessionsLoading(true);
+      const sessions = await apiClient.sessions.getMySessions();
+      setMySessions(sessions);
     } catch (error) {
-      setError("내 세션 목록을 불러오는 중 오류가 발생했습니다.")
+      setError("내 세션 목록을 불러오는 중 오류가 발생했습니다.");
     } finally {
-      setMySessionsLoading(false)
+      setMySessionsLoading(false);
     }
-  }
+  };
 
   // useEffect 수정
   useEffect(() => {
     if (activeTab === "all") {
-      setSessions([])
-      fetchSessions(1)
-      setPage(1)
+      setSessions([]);
+      fetchSessions(1);
+      setPage(1);
     } else if (activeTab === "my" && isAuthenticated) {
-      fetchMySessions()
+      fetchMySessions();
     }
-  }, [activeTab, isAuthenticated])
+  }, [activeTab, isAuthenticated]);
 
   // 탭 변경 핸들러 추가
   const handleTabChange = (tab: "all" | "my") => {
-    setActiveTab(tab)
-    setPage(1) // 탭 변경 시 페이지 초기화
-  }
+    setActiveTab(tab);
+    setPage(1); // 탭 변경 시 페이지 초기화
+  };
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
+    const date = new Date(dateString);
     return date.toLocaleDateString("ko-KR", {
       year: "numeric",
       month: "long",
       day: "numeric",
-    })
-  }
+    });
+  };
 
   const loadMore = () => {
-    fetchSessions(page + 1)
-  }
+    fetchSessions(page + 1);
+  };
 
   return (
     <div className="min-h-screen bg-[#F5F5F5] py-12 px-4">
@@ -133,7 +128,11 @@ export default function SessionsPage() {
           )}
         </div>
 
-        {error && <div className="bg-red-50 text-red-600 p-4 rounded-md mb-6">{error}</div>}
+        {error && (
+          <div className="bg-red-50 text-red-600 p-4 rounded-md mb-6">
+            {error}
+          </div>
+        )}
 
         {!isAuthenticated && (
           <div className="bg-blue-50 text-blue-700 p-4 rounded-md mb-6">
@@ -150,7 +149,9 @@ export default function SessionsPage() {
         {activeTab === "all" ? (
           sessions.length === 0 && !loading ? (
             <div className="text-center py-12">
-              <p className="text-lg text-gray-500 mb-4">아직 세션이 없습니다.</p>
+              <p className="text-lg text-gray-500 mb-4">
+                아직 세션이 없습니다.
+              </p>
               {isAuthenticated ? (
                 <Button asChild className="bg-[#33691E] hover:bg-[#1B5E20]">
                   <Link href="/sessions/create">
@@ -172,10 +173,16 @@ export default function SessionsPage() {
                 <Link href={`/sessions/${session.id}`} key={session.id}>
                   <Card className="h-full border-0 shadow-sm hover:shadow-md transition-shadow">
                     <CardHeader>
-                      <CardTitle className="text-[#5D4037]">{session.name}</CardTitle>
+                      <CardTitle className="text-[#5D4037]">
+                        {session.name}
+                      </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      {session.description && <p className="text-[#33691E] mb-4">{session.description}</p>}
+                      {session.description && (
+                        <p className="text-[#33691E] mb-4">
+                          {session.description}
+                        </p>
+                      )}
                       <div className="flex items-center text-sm text-gray-500 mb-2">
                         <Users className="h-4 w-4 mr-2" />
                         <span>멤버 {session.memberCount}명</span>
@@ -186,7 +193,9 @@ export default function SessionsPage() {
                       </div>
                     </CardContent>
                     <CardFooter>
-                      <p className="text-sm text-gray-500">소유자: {session.owner.username}</p>
+                      <p className="text-sm text-gray-500">
+                        소유자: {session.owner.username}
+                      </p>
                     </CardFooter>
                   </Card>
                 </Link>
@@ -199,7 +208,9 @@ export default function SessionsPage() {
           </div>
         ) : mySessions.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-lg text-gray-500 mb-4">아직 참여한 세션이 없습니다.</p>
+            <p className="text-lg text-gray-500 mb-4">
+              아직 참여한 세션이 없습니다.
+            </p>
             <Button asChild className="bg-[#33691E] hover:bg-[#1B5E20]">
               <Link href="/sessions/create">
                 <Plus className="mr-2 h-4 w-4" />새 세션 만들기
@@ -212,10 +223,16 @@ export default function SessionsPage() {
               <Link href={`/sessions/${session.id}`} key={session.id}>
                 <Card className="h-full border-0 shadow-sm hover:shadow-md transition-shadow">
                   <CardHeader>
-                    <CardTitle className="text-[#5D4037]">{session.name}</CardTitle>
+                    <CardTitle className="text-[#5D4037]">
+                      {session.name}
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {session.description && <p className="text-[#33691E] mb-4">{session.description}</p>}
+                    {session.description && (
+                      <p className="text-[#33691E] mb-4">
+                        {session.description}
+                      </p>
+                    )}
                     <div className="flex items-center text-sm text-gray-500 mb-2">
                       <Users className="h-4 w-4 mr-2" />
                       <span>멤버 {session.memberCount}명</span>
@@ -226,7 +243,9 @@ export default function SessionsPage() {
                     </div>
                   </CardContent>
                   <CardFooter>
-                    <p className="text-sm text-gray-500">소유자: {session.owner.username}</p>
+                    <p className="text-sm text-gray-500">
+                      소유자: {session.owner.username}
+                    </p>
                   </CardFooter>
                 </Card>
               </Link>
@@ -236,7 +255,12 @@ export default function SessionsPage() {
 
         {hasMore && activeTab === "all" && (
           <div className="flex justify-center mt-8">
-            <Button onClick={loadMore} variant="outline" disabled={loading} className="border-gray-200">
+            <Button
+              onClick={loadMore}
+              variant="outline"
+              disabled={loading}
+              className="border-gray-200"
+            >
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -250,5 +274,5 @@ export default function SessionsPage() {
         )}
       </div>
     </div>
-  )
+  );
 }

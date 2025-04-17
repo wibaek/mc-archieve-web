@@ -1,7 +1,7 @@
 import type {
   AuthResponse,
   LoginRequest,
-  RegisterRequest,
+  SignupRequest,
   User,
 } from "@/types/api";
 import axiosInstance from "./axios-config";
@@ -33,10 +33,10 @@ export const auth = {
   },
 
   // 회원가입
-  register: async (data: RegisterRequest): Promise<AuthResponse> => {
+  signup: async (data: SignupRequest): Promise<AuthResponse> => {
     try {
       const response = await axiosInstance.post<AuthResponse>(
-        "/v1/auth/register",
+        "/v1/auth/signup",
         data
       );
 

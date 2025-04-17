@@ -47,6 +47,13 @@ export const auth = {
     const response = await api.post<AuthResponse>("/auth/refresh");
     return response.data;
   },
+
+  getCurrentUser: async (): Promise<{ success: boolean; data: User }> => {
+    const response = await api.get<{ success: boolean; data: User }>(
+      "/auth/me"
+    );
+    return response.data;
+  },
 };
 
 // 사용자 관련 API

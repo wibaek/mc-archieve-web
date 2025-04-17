@@ -24,7 +24,12 @@ export function useAuth() {
         }
 
         const userData = await apiClient.auth.getCurrentUser();
-        setUser(userData);
+        if (userData.success) {
+          setUser(userData.data);
+        } else {
+          setUser(null);
+          localStorage.removeItem("token");
+        }
       } catch (err) {
         setError("인증 확인 중 오류가 발생했습니다.");
         setUser(null);

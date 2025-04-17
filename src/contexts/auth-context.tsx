@@ -1,105 +1,103 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { createContext, useContext, useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { apiClient } from "@/services/api"
-import { hasToken, removeToken } from "@/services/token"
-import type { User } from "@/types/api"
+import type React from "react";
+import { createContext, useContext, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { apiClient } from "@/services/api";
+import { hasToken, removeToken } from "@/services/token";
+import type { User } from "@/types/api";
 
 interface AuthContextType {
-  user: User | null
-  loading: boolean
-  error: string | null
-  login: (username: string, password: string) => Promise<{ success: boolean; message?: string }>
-  register: (username: string, email: string, password: string) => Promise<{ success: boolean; message?: string }>
-  logout: () => void
-  isAuthenticated: boolean
+  user: User | null;
+  loading: boolean;
+  error: string | null;
+  login: (
+    email: string,
+    password: string
+  ) => Promise<{ success: boolean; message?: string }>;
+  signup: (
+    email: string,
+    password: string,
+    nickname: string
+  ) => Promise<{ success: boolean; message?: string }>;
+  logout: () => void;
+  isAuthenticated: boolean;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined)
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const router = useRouter()
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
-    const checkAuth = async () => {
+    const initializeAuth = async () => {
       try {
-        setLoading(true)
-
         // 토큰이 있는지 확인
         if (typeof window !== "undefined" && hasToken()) {
-          const response = await apiClient.auth.getCurrentUser()
+          const response = await apiClient.auth.getCurrentUser();
 
           if (response.success) {
-            setUser(response.data)
+            setUser(response.data);
+            setIsAuthenticated(true);
           } else {
-            setUser(null)
-            removeToken()
+            // 토큰이 유효하지 않은 경우 로그아웃
+            logout();
           }
-        } else {
-          setUser(null)
         }
-      } catch (err) {
-        setError("인증 확인 중 오류가 발생했습니다.")
-        setUser(null)
-        removeToken()
+      } catch (error) {
+        console.error("Failed to initialize auth:", error);
+        logout();
       } finally {
-        setLoading(false)
+        setInitialized(true);
       }
-    }
+    };
 
-    checkAuth()
-  }, [])
+    initializeAuth();
+  }, []);
 
-  const login = async (username: string, password: string) => {
+  const login = async (email: string, password: string) => {
     try {
-      setLoading(true)
-      const response = await apiClient.auth.login({ username, password })
-
-      if (response.success) {
-        setUser(response.data.user)
-        return { success: true }
-      } else {
-        setError("로그인에 실패했습니다.")
-        return { success: false, message: response.message }
-      }
-    } catch (err) {
-      setError("로그인 중 오류가 발생했습니다.")
-      return { success: false, message: "로그인 중 오류가 발생했습니다." }
-    } finally {
-      setLoading(false)
+      setError(null);
+      const response = await apiClient.auth.login({ email, password });
+      setUser(response.user);
+      setIsAuthenticated(true);
+      return { success: true };
+    } catch (error) {
+      console.error("Failed to login:", error);
+      setError("로그인에 실패했습니다.");
+      return { success: false };
     }
-  }
+  };
 
-  const register = async (username: string, email: string, password: string) => {
+  const signup = async (email: string, password: string, nickname: string) => {
     try {
-      setLoading(true)
-      const response = await apiClient.auth.register({ username, email, password })
-
-      if (response.success) {
-        setUser(response.data.user)
-        return { success: true }
-      } else {
-        setError("회원가입에 실패했습니다.")
-        return { success: false, message: response.message }
-      }
-    } catch (err) {
-      setError("회원가입 중 오류가 발생했습니다.")
-      return { success: false, message: "회원가입 중 오류가 발생했습니다." }
-    } finally {
-      setLoading(false)
+      setError(null);
+      const response = await apiClient.auth.signup({
+        email,
+        password,
+        nickname,
+      });
+      setUser(response.user);
+      setIsAuthenticated(true);
+      return { success: true };
+    } catch (error) {
+      console.error("Failed to signup:", error);
+      setError("회원가입에 실패했습니다.");
+      return { success: false };
     }
-  }
+  };
 
   const logout = () => {
-    apiClient.auth.logout()
-    setUser(null)
-    router.push("/login")
-  }
+    apiClient.auth.logout();
+    setUser(null);
+    setIsAuthenticated(false);
+    router.push("/login");
+  };
 
   return (
     <AuthContext.Provider
@@ -108,20 +106,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         loading,
         error,
         login,
-        register,
+        signup,
         logout,
-        isAuthenticated: !!user,
+        isAuthenticated,
       }}
     >
       {children}
     </AuthContext.Provider>
-  )
+  );
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext)
+  const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider")
+    throw new Error("useAuth must be used within an AuthProvider");
   }
-  return context
+  return context;
 }

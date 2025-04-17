@@ -22,7 +22,7 @@ export default function SessionsPage() {
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const router = useRouter();
 
   // 상태 추가
@@ -31,12 +31,14 @@ export default function SessionsPage() {
   const [mySessionsLoading, setMySessionsLoading] = useState(false);
 
   // 세션 목록 가져오기 함수
-  const fetchSessions = async (page: number) => {
+  const fetchSessions = async () => {
     try {
       setLoading(true);
-      const sessions = await apiClient.sessions.getSessions();
-      setSessions((prevSessions) => [...prevSessions, ...sessions]);
-      setHasMore(sessions.length > 0);
+      const response = await apiClient.sessions.getSessions(page, 10);
+      setSessions((prevSessions) => [...prevSessions, ...response.items]);
+      setHasMore(
+        response.items.length > 0 && response.page < response.totalPages
+      );
     } catch (error) {
       setError("세션 목록을 불러오는 중 오류가 발생했습니다.");
     } finally {
@@ -46,16 +48,32 @@ export default function SessionsPage() {
 
   // 내 세션 목록 가져오기 함수 추가
   const fetchMySessions = async () => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated || !user) return;
 
     try {
-      setMySessionsLoading(true);
-      const sessions = await apiClient.sessions.getMySessions();
-      setMySessions(sessions);
+      setLoading(true);
+      const response = await apiClient.sessions.getSessions(page, 10);
+
+      // 각 세션의 멤버 정보를 가져와서 필터링
+      const mySessionsPromises = response.items.map(async (session) => {
+        const members = await apiClient.sessions.getSessionMembers(session.id);
+        return members.items.some((member) => member.userId === user.id)
+          ? session
+          : null;
+      });
+
+      const mySessions = (await Promise.all(mySessionsPromises)).filter(
+        (session): session is Session => session !== null
+      );
+
+      setSessions((prevSessions) => [...prevSessions, ...mySessions]);
+      setHasMore(
+        response.items.length > 0 && response.page < response.totalPages
+      );
     } catch (error) {
       setError("내 세션 목록을 불러오는 중 오류가 발생했습니다.");
     } finally {
-      setMySessionsLoading(false);
+      setLoading(false);
     }
   };
 
@@ -63,7 +81,7 @@ export default function SessionsPage() {
   useEffect(() => {
     if (activeTab === "all") {
       setSessions([]);
-      fetchSessions(1);
+      fetchSessions();
       setPage(1);
     } else if (activeTab === "my" && isAuthenticated) {
       fetchMySessions();
@@ -86,7 +104,7 @@ export default function SessionsPage() {
   };
 
   const loadMore = () => {
-    fetchSessions(page + 1);
+    fetchSessions();
   };
 
   return (

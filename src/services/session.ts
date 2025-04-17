@@ -119,8 +119,25 @@ export const session = {
     }
   },
 
+  // 세션 참가 요청 목록 조회
+  getSessionJoinRequests: async (
+    sessionId: string
+  ): Promise<{ items: SessionJoinRequest[] }> => {
+    try {
+      const response = await axiosInstance.get<{
+        applications: SessionJoinRequest[];
+      }>(`/v1/sessions/${sessionId}/join-applications`);
+      return { items: response.data.applications };
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        return { items: error.response.data as SessionJoinRequest[] };
+      }
+      throw error;
+    }
+  },
+
   // 세션 참가 요청 보내기
-  joinSession: async (sessionId: string): Promise<void> => {
+  requestJoinSession: async (sessionId: string): Promise<void> => {
     try {
       await axiosInstance.post(`/v1/sessions/${sessionId}/join`);
     } catch (error) {
@@ -131,25 +148,8 @@ export const session = {
     }
   },
 
-  // 세션 참가 요청 목록 조회
-  getJoinApplications: async (
-    sessionId: string
-  ): Promise<SessionJoinRequest[]> => {
-    try {
-      const response = await axiosInstance.get<{
-        applications: SessionJoinRequest[];
-      }>(`/v1/sessions/${sessionId}/join-applications`);
-      return response.data.applications;
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
-        return error.response.data as SessionJoinRequest[];
-      }
-      throw error;
-    }
-  },
-
   // 세션 참가 요청 승인
-  approveJoinRequest: async (
+  acceptJoinRequest: async (
     sessionId: string,
     applicationId: string
   ): Promise<void> => {

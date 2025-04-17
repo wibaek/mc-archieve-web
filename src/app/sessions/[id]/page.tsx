@@ -21,7 +21,7 @@ import {
   LogIn,
   Plus,
 } from "lucide-react";
-import { apiClient } from "@/services/api";
+import { session } from "@/services/session";
 import type {
   Session,
   SessionMember,
@@ -33,7 +33,7 @@ import { useAuth } from "@/contexts/auth-context";
 
 export default function SessionDetailPage() {
   const { id } = useParams() as { id: string };
-  const [session, setSession] = useState<Session | null>(null);
+  const [sessionData, setSessionData] = useState<Session | null>(null);
   const [members, setMembers] = useState<SessionMember[]>([]);
   const [joinRequests, setJoinRequests] = useState<SessionJoinRequest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -50,8 +50,8 @@ export default function SessionDetailPage() {
   const fetchSession = async () => {
     try {
       setLoading(true);
-      const sessionData = await apiClient.sessions.getSession(id);
-      setSession(sessionData);
+      const sessionData = await session.getSession(id);
+      setSessionData(sessionData);
     } catch (error) {
       setError("세션 정보를 불러오는 중 오류가 발생했습니다.");
     } finally {
@@ -62,13 +62,13 @@ export default function SessionDetailPage() {
   const fetchMembers = async () => {
     try {
       setMembersLoading(true);
-      const membersData = await apiClient.sessions.getSessionMembers(id);
+      const membersData = await session.getSessionMembers(id);
       setMembers(membersData.items || []);
 
       // 내 역할 확인 (로그인한 경우에만)
       if (user) {
         const myMembership = membersData.items?.find(
-          (member) => member.userId === user.id
+          (member: SessionMember) => member.userId === user.id
         );
         if (myMembership) {
           setMyRole(myMembership.role);
@@ -86,21 +86,24 @@ export default function SessionDetailPage() {
 
   const fetchJoinRequests = async () => {
     // 로그인한 사용자이고 세션 소유자인 경우에만 요청 목록 가져오기
-    if (!isAuthenticated || !user || !session || session.ownerId !== user.id) {
+    if (
+      !isAuthenticated ||
+      !user ||
+      !sessionData ||
+      sessionData.ownerId !== user.id
+    ) {
       return;
     }
 
     try {
       setRequestsLoading(true);
-      const requests = await apiClient.sessions.getSessionJoinRequests(
-        session.id
-      );
+      const requests = await session.getSessionJoinRequests(id);
       setJoinRequests(requests.items || []);
 
       // 내 참가 요청 확인
       if (user) {
         const myRequest = requests.items?.find(
-          (request) => request.userId === user.id
+          (request: SessionJoinRequest) => request.userId === user.id
         );
         setHasJoinRequest(!!myRequest);
       }
@@ -118,16 +121,16 @@ export default function SessionDetailPage() {
   }, [id]);
 
   useEffect(() => {
-    if (session && user && session.ownerId === user.id) {
+    if (sessionData && user && sessionData.ownerId === user.id) {
       fetchJoinRequests();
     }
-  }, [session, user]);
+  }, [sessionData, user]);
 
   const handleJoinSession = async () => {
-    if (!session) return;
+    if (!sessionData) return;
     try {
       setLoading(true);
-      await apiClient.sessions.requestJoinSession(session.id);
+      await session.requestJoinSession(sessionData.id);
       router.refresh();
     } catch (error) {
       console.error("Failed to join session:", error);
@@ -137,10 +140,10 @@ export default function SessionDetailPage() {
   };
 
   const handleApproveRequest = async (requestId: string) => {
-    if (!session) return;
+    if (!sessionData) return;
     try {
       setLoading(true);
-      await apiClient.sessions.acceptJoinRequest(session.id, requestId);
+      await session.acceptJoinRequest(sessionData.id, requestId);
       router.refresh();
     } catch (error) {
       console.error("Failed to approve request:", error);
@@ -150,14 +153,14 @@ export default function SessionDetailPage() {
   };
 
   const handleDeleteSession = async () => {
-    if (!session) return;
+    if (!sessionData) return;
     if (
       confirm(
         "정말로 이 세션을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다."
       )
     ) {
       try {
-        await apiClient.sessions.deleteSession(session.id);
+        await session.deleteSession(sessionData.id);
         router.push("/sessions");
       } catch (error) {
         console.error("Failed to delete session:", error);
@@ -182,7 +185,7 @@ export default function SessionDetailPage() {
     );
   }
 
-  if (error || !session) {
+  if (error || !sessionData) {
     return (
       <div className="min-h-screen bg-[#F5F5F5] py-12 px-4">
         <div className="container mx-auto max-w-4xl">
@@ -200,7 +203,7 @@ export default function SessionDetailPage() {
     );
   }
 
-  const isOwner = user && session.ownerId === user.id;
+  const isOwner = user && sessionData.ownerId === user.id;
   const isMember = myRole !== null;
 
   return (
@@ -217,18 +220,18 @@ export default function SessionDetailPage() {
           <CardHeader className="flex flex-row items-start justify-between">
             <div>
               <CardTitle className="text-2xl font-bold text-[#5D4037]">
-                {session.name}
+                {sessionData.name}
               </CardTitle>
               <div className="flex items-center text-sm text-gray-500 mt-2">
                 <Calendar className="h-4 w-4 mr-2" />
-                <span>생성일: {formatDate(session.createdAt)}</span>
+                <span>생성일: {formatDate(sessionData.createdAt)}</span>
               </div>
             </div>
             <div className="flex space-x-2">
               {isOwner && (
                 <>
                   <Button asChild variant="outline" size="sm">
-                    <Link href={`/sessions/${session.id}/edit`}>
+                    <Link href={`/sessions/${sessionData.id}/edit`}>
                       <Edit className="h-4 w-4 mr-1" />
                       편집
                     </Link>
@@ -246,15 +249,15 @@ export default function SessionDetailPage() {
             </div>
           </CardHeader>
           <CardContent>
-            {session.description && (
-              <p className="text-[#33691E] mb-6">{session.description}</p>
+            {sessionData.description && (
+              <p className="text-[#33691E] mb-6">{sessionData.description}</p>
             )}
             <div className="flex items-center text-sm text-gray-500">
               <Users className="h-4 w-4 mr-2" />
-              <span>멤버 {session.memberCount}명</span>
+              <span>멤버 {sessionData.memberCount}명</span>
             </div>
             <div className="mt-2 text-sm text-gray-500">
-              <span>소유자: {session.owner.username}</span>
+              <span>소유자: {sessionData.owner.username}</span>
             </div>
           </CardContent>
         </Card>

@@ -23,14 +23,8 @@ export function useAuth() {
           return;
         }
 
-        const response = await apiClient.auth.getCurrentUser();
-
-        if (response.success) {
-          setUser(response.data);
-        } else {
-          setUser(null);
-          localStorage.removeItem("token");
-        }
+        const userData = await apiClient.auth.getCurrentUser();
+        setUser(userData);
       } catch (err) {
         setError("인증 확인 중 오류가 발생했습니다.");
         setUser(null);
@@ -46,15 +40,9 @@ export function useAuth() {
   const login = async (email: string, password: string) => {
     try {
       setLoading(true);
-      const response = await apiClient.auth.login({ email, password });
-
-      if (response.success) {
-        setUser(response.data.user);
-        return { success: true };
-      } else {
-        setError("로그인에 실패했습니다.");
-        return { success: false, message: response.message };
-      }
+      const authData = await apiClient.auth.login({ email, password });
+      setUser(authData.user);
+      return { success: true };
     } catch (err) {
       setError("로그인 중 오류가 발생했습니다.");
       return { success: false, message: "로그인 중 오류가 발생했습니다." };
@@ -70,19 +58,13 @@ export function useAuth() {
   ) => {
     try {
       setLoading(true);
-      const response = await apiClient.auth.register({
+      const authData = await apiClient.auth.register({
         username,
         email,
         password,
       });
-
-      if (response.success) {
-        setUser(response.data.user);
-        return { success: true };
-      } else {
-        setError("회원가입에 실패했습니다.");
-        return { success: false, message: response.message };
-      }
+      setUser(authData.user);
+      return { success: true };
     } catch (err) {
       setError("회원가입 중 오류가 발생했습니다.");
       return { success: false, message: "회원가입 중 오류가 발생했습니다." };

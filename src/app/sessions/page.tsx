@@ -26,7 +26,6 @@ export default function SessionsPage() {
       try {
         setLoading(true);
         const response = await session.getSessions({ page: 1, limit: 10 });
-        // 응답이 배열인지 확인
         const sessionsData = Array.isArray(response) ? response : [];
         setSessions(sessionsData);
       } catch (error) {
@@ -41,35 +40,38 @@ export default function SessionsPage() {
   }, []);
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("ko-KR", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
+    try {
+      const date = new Date(dateString);
+      const year = date.getFullYear();
+      const month = date.getMonth() + 1;
+      const day = date.getDate();
+      return `${year}년 ${month}월 ${day}일`;
+    } catch (e) {
+      return dateString;
+    }
   };
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-[#5D4037]" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#F5F5F5] py-12 px-4">
+    <div className="min-h-screen bg-page py-12 px-4">
       <div className="container mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-[#5D4037]">세션 목록</h1>
+          <h1 className="text-3xl font-bold text-primary">세션 목록</h1>
           {isAuthenticated ? (
-            <Button asChild className="bg-[#33691E] hover:bg-[#1B5E20]">
+            <Button asChild className="bg-accent hover:bg-accent/90">
               <Link href="/sessions/create">
                 <Plus className="mr-2 h-4 w-4" />새 세션 만들기
               </Link>
             </Button>
           ) : (
-            <Button asChild className="bg-[#795548] hover:bg-[#5D4037]">
+            <Button asChild className="bg-primary hover:bg-primary/90">
               <Link href="/login">
                 <LogIn className="mr-2 h-4 w-4" />
                 로그인하여 세션 만들기
@@ -79,13 +81,13 @@ export default function SessionsPage() {
         </div>
 
         {error && (
-          <div className="bg-red-50 text-red-600 p-4 rounded-md mb-6">
+          <div className="bg-destructive/10 text-destructive p-4 rounded-md mb-6">
             {error}
           </div>
         )}
 
         {!isAuthenticated && (
-          <div className="bg-blue-50 text-blue-700 p-4 rounded-md mb-6">
+          <div className="bg-secondary/10 text-secondary p-4 rounded-md mb-6">
             <p>
               세션을 생성하거나 참여하려면{" "}
               <Link href="/login" className="underline font-medium">
@@ -98,15 +100,17 @@ export default function SessionsPage() {
 
         {sessions.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-lg text-gray-500 mb-4">아직 세션이 없습니다.</p>
+            <p className="text-lg text-muted-foreground mb-4">
+              아직 세션이 없습니다.
+            </p>
             {isAuthenticated ? (
-              <Button asChild className="bg-[#33691E] hover:bg-[#1B5E20]">
+              <Button asChild className="bg-accent hover:bg-accent/90">
                 <Link href="/sessions/create">
                   <Plus className="mr-2 h-4 w-4" />첫 세션 만들기
                 </Link>
               </Button>
             ) : (
-              <Button asChild className="bg-[#795548] hover:bg-[#5D4037]">
+              <Button asChild className="bg-primary hover:bg-primary/90">
                 <Link href="/login">
                   <LogIn className="mr-2 h-4 w-4" />
                   로그인하여 세션 만들기
@@ -120,22 +124,22 @@ export default function SessionsPage() {
               <Link href={`/sessions/${session.id}`} key={session.id}>
                 <Card className="h-full border-0 shadow-sm hover:shadow-md transition-shadow">
                   <CardHeader>
-                    <CardTitle className="text-[#5D4037]">
+                    <CardTitle className="text-primary">
                       {session.name}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="flex items-center text-sm text-gray-500 mb-2">
+                    <div className="flex items-center text-sm text-muted-foreground mb-2">
                       <Users className="h-4 w-4 mr-2" />
                       <span>멤버 {1}명</span>
                     </div>
-                    <div className="flex items-center text-sm text-gray-500">
+                    <div className="flex items-center text-sm text-muted-foreground">
                       <Calendar className="h-4 w-4 mr-2" />
                       <span>생성일: {formatDate(session.startDate)}</span>
                     </div>
                   </CardContent>
                   <CardFooter>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-muted-foreground">
                       소유자: {session.owner.nickname}
                     </p>
                   </CardFooter>

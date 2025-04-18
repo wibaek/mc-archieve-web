@@ -236,7 +236,7 @@ export default function UploadPage() {
           </CardContent>
           <CardFooter className="flex justify-center border-t border-gray-100 pt-4">
             <p className="text-xs text-gray-500">
-              업로드한 콘텐츠는 MC Archive의 커뮤니티 가이드라인을 준수해야
+              업로드한 콘텐츠는 MC Archieve의 커뮤니티 가이드라인을 준수해야
               합니다.
             </p>
           </CardFooter>

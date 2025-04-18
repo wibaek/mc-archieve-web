@@ -69,7 +69,7 @@ export default function RegisterPage() {
             계정 만들기
           </CardTitle>
           <CardDescription className="text-[#33691E]">
-            MC Archive 계정을 만들기 위해 정보를 입력해주세요
+            MC Archieve 계정을 만들기 위해 정보를 입력해주세요
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

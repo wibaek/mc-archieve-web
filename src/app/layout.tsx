@@ -9,7 +9,7 @@ import { AuthProvider } from "@/contexts/auth-context";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "MC Archive",
+  title: "MC Archieve",
   description: "마인크래프트 스크린샷과 창작물을 업로드하고 공유하세요",
 };
 

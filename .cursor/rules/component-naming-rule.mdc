@@ -1,0 +1,9 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# Your rule content
+
+- 컴포넌트는 PascalCase로 이름짓고, 파일명도 동일하게 가져간다

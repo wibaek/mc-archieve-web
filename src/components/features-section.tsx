@@ -22,13 +22,13 @@ export default function FeaturesSection() {
   return (
     <div className="mt-24 grid gap-8 md:grid-cols-3">
       <FeatureCard
-        title="작품 공유"
-        description="여러분의 마인크래프트 창작물을 다른 사용자들과 공유하세요."
+        title="사진 공유"
+        description="여러분의 마인크래프트 사진을 다른 사용자들과 공유하세요."
         icon={<Cube className="h-6 w-6 text-accent" />}
       />
       <FeatureCard
-        title="영감 얻기"
-        description="다른 사용자들의 창작물을 보고 새로운 아이디어를 얻으세요."
+        title="사진 저장소"
+        description="여러분이 플레이한 서버의 기억을 오래동안 남기세요."
         icon={<Cube className="h-6 w-6 text-accent" />}
       />
       <FeatureCard

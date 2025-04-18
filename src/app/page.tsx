@@ -13,7 +13,7 @@ export default function Home() {
             마인크래프트 아카이브
           </h1>
           <p className="mb-10 text-lg text-accent/90 md:text-xl max-w-2xl mx-auto">
-            여러분의 마인크래프트 창작물을 공유하고 영감을 얻으세요
+            여러분의 마인크래프트 서버 추억을 공유하고 기록하세요
           </p>
           <Button
             size="lg"

@@ -63,14 +63,13 @@ export interface RespondToJoinRequestRequest {
 
 // 스토리 정보
 export interface Story {
-  id: string;
-  title: string;
-  content: string;
-  sessionId: string;
-  userId: string;
-  user: User;
-  createdAt: string;
-  updatedAt: string;
+  id: number;
+  caption: string;
+  imageUrl: string;
+  createdBy: {
+    nickname: string;
+    profileImageUrl: string | null;
+  };
 }
 
 // 스토리 생성 요청

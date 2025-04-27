@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -20,6 +21,7 @@ import {
   X,
   LogIn,
   Plus,
+  Image as ImageIcon,
 } from "lucide-react";
 import { session } from "@/services/session";
 import type {
@@ -30,6 +32,59 @@ import type {
 } from "@/types/session";
 import { SessionMemberRole } from "@/types/session";
 import { useAuth } from "@/contexts/auth-context";
+
+const StoryGrid = ({ stories }: { stories: Story[] }) => {
+  if (!stories || stories.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <ImageIcon className="mx-auto h-12 w-12 text-gray-400" />
+        <h3 className="mt-2 text-sm font-medium text-gray-900">
+          스토리가 없습니다
+        </h3>
+        <p className="mt-1 text-sm text-gray-500">
+          첫 번째 스토리를 작성해보세요!
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      {stories.map((story) => (
+        <div
+          key={story.id}
+          className="group relative aspect-square overflow-hidden rounded-lg bg-gray-100 hover:opacity-90 transition-opacity"
+        >
+          <Image
+            src={story.imageUrl}
+            alt={story.caption}
+            fill
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="absolute bottom-0 left-0 right-0 p-4">
+              <div className="flex items-center gap-2 mb-2">
+                {story.createdBy.profileImageUrl && (
+                  <Image
+                    src={story.createdBy.profileImageUrl}
+                    alt={story.createdBy.nickname}
+                    width={24}
+                    height={24}
+                    className="rounded-full"
+                  />
+                )}
+                <p className="text-sm font-medium text-white">
+                  {story.createdBy.nickname}
+                </p>
+              </div>
+              <p className="text-xs text-white/80 truncate">{story.caption}</p>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
 
 export default function SessionDetailPage() {
   const { id } = useParams() as { id: string };
@@ -46,6 +101,8 @@ export default function SessionDetailPage() {
   const [hasJoinRequest, setHasJoinRequest] = useState(false);
   const { user, isAuthenticated } = useAuth();
   const router = useRouter();
+  const [stories, setStories] = useState<Story[]>([]);
+  const [storiesLoading, setStoriesLoading] = useState(false);
 
   const fetchSession = async () => {
     try {
@@ -94,6 +151,19 @@ export default function SessionDetailPage() {
     }
   };
 
+  const fetchStories = async () => {
+    if (!id) return;
+    try {
+      setStoriesLoading(true);
+      const storiesData = await session.getSessionStories(id);
+      setStories(storiesData);
+    } catch (error) {
+      console.error("스토리를 불러오는 중 오류가 발생했습니다.", error);
+    } finally {
+      setStoriesLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchSession();
     fetchMembers();
@@ -104,6 +174,12 @@ export default function SessionDetailPage() {
       fetchJoinRequests();
     }
   }, [sessionData, user]);
+
+  useEffect(() => {
+    if (sessionData) {
+      fetchStories();
+    }
+  }, [sessionData]);
 
   const handleJoinSession = async () => {
     if (!sessionData) return;
@@ -285,11 +361,31 @@ export default function SessionDetailPage() {
           </Card>
         )}
 
-        <Tabs defaultValue="members">
+        <Tabs defaultValue="stories">
           <TabsList className="mb-6">
+            <TabsTrigger value="stories">스토리</TabsTrigger>
             <TabsTrigger value="members">멤버</TabsTrigger>
             {isOwner && <TabsTrigger value="requests">참가 요청</TabsTrigger>}
           </TabsList>
+
+          <TabsContent value="stories">
+            <Card className="border-0 shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-lg font-semibold text-[#5D4037]">
+                  스토리
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {storiesLoading ? (
+                  <div className="flex justify-center py-8">
+                    <Loader2 className="h-6 w-6 animate-spin text-[#5D4037]" />
+                  </div>
+                ) : (
+                  <StoryGrid stories={stories} />
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           <TabsContent value="members">
             <Card className="border-0 shadow-sm">

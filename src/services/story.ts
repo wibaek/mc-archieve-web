@@ -9,8 +9,14 @@ export const createStory = async (
   caption: string | null
 ): Promise<Story> => {
   try {
+    const formData = new FormData();
+    formData.append("image", image);
+    if (caption !== null) {
+      formData.append("caption", caption);
+    }
     const response = await axiosInstance.post<Story>(
-      `/v1/sessions/${sessionId}/stories`
+      `/v1/sessions/${sessionId}/stories`,
+      formData
     );
     return response.data;
   } catch (error) {

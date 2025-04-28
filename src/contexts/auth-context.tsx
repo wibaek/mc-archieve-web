@@ -3,9 +3,10 @@
 import type React from "react";
 import { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { auth } from "@/services/auth";
+import { getCurrentUser } from "@/services/user";
 import { hasToken, removeToken } from "@/services/token";
-import type { User } from "@/types/api";
+import type { User } from "@/types/user";
+import { login as authLogin, signup as authSignup } from "@/services/auth";
 
 interface AuthContextType {
   user: User | null;
@@ -39,7 +40,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setLoading(true);
         // 토큰이 있는지 확인
         if (typeof window !== "undefined" && hasToken()) {
-          const user = await auth.getCurrentUser();
+          const user = await getCurrentUser();
           setUser(user);
           setIsAuthenticated(true);
         }
@@ -58,8 +59,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       setError(null);
       setLoading(true);
-      const response = await auth.login({ email, password });
-      setUser(response.user);
+      const response = await authLogin({ email, password });
+      // 로그인 성공 후 현재 사용자 정보를 가져옵니다
+      const user = await getCurrentUser();
+      setUser(user);
       setIsAuthenticated(true);
       return { success: true };
     } catch (error) {
@@ -75,8 +78,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       setError(null);
       setLoading(true);
-      const response = await auth.signup({ email, password, nickname });
-      setUser(response.user);
+      await authSignup({ email, password, nickname });
+      // 회원가입 성공 후 현재 사용자 정보를 가져옵니다
+      const user = await getCurrentUser();
+      setUser(user);
       setIsAuthenticated(true);
       return { success: true };
     } catch (error) {
@@ -89,7 +94,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = () => {
-    auth.logout();
+    removeToken();
     setUser(null);
     setIsAuthenticated(false);
     router.push("/login");

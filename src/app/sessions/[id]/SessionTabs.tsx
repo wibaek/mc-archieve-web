@@ -2,8 +2,9 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { Session, Story } from "@/types/session";
+import type { Session } from "@/types/session";
 import StoryGrid from "./StoryGrid";
+import { Story } from "@/types/story";
 
 interface SessionTabsProps {
   session: Session;

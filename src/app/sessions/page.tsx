@@ -11,9 +11,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Loader2, Plus, Users, Calendar, LogIn } from "lucide-react";
-import { session } from "@/services/session";
+
 import { useAuth } from "@/contexts/auth-context";
 import { Session } from "@/types/session";
+import { getSessions } from "@/services/session";
 
 export default function SessionsPage() {
   const [sessions, setSessions] = useState<Session[]>([]);
@@ -25,7 +26,7 @@ export default function SessionsPage() {
     const fetchSessions = async () => {
       try {
         setLoading(true);
-        const response = await session.getSessions({ page: 1, limit: 10 });
+        const response = await getSessions({ page: 1, limit: 10 });
         const sessionsData = Array.isArray(response) ? response : [];
         setSessions(sessionsData);
       } catch (error) {
@@ -135,7 +136,10 @@ export default function SessionsPage() {
                     </div>
                     <div className="flex items-center text-sm text-muted-foreground">
                       <Calendar className="h-4 w-4 mr-2" />
-                      <span>생성일: {formatDate(session.startDate)}</span>
+                      <span>
+                        생성일:{" "}
+                        {session.startDate && formatDate(session.startDate)}
+                      </span>
                     </div>
                   </CardContent>
                   <CardFooter>

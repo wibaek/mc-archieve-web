@@ -3,15 +3,16 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import SessionHeader from "./SessionHeader";
 import SessionTabs from "./SessionTabs";
-import { session } from "@/services/session";
+import { getSession } from "@/services/session";
+import { getStoriesBySession } from "@/services/story";
 
 interface SessionDetailPageProps {
   id: string;
 }
 
 export async function SessionDetailPage({ id }: SessionDetailPageProps) {
-  const sessionData = await session.getSession(id);
-  const stories = await session.getSessionStories(id);
+  const sessionData = await getSession(id);
+  const stories = await getStoriesBySession(parseInt(id, 10));
   const isOwner = false; // TODO: 실제 소유자 확인 로직 구현
 
   return (

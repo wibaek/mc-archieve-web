@@ -7,23 +7,7 @@ export interface PaginatedResponse<T> {
   totalPages: number;
 }
 
-// 인증 관련 타입
-export interface LoginRequest {
-  email: string;
-  password: string;
-}
-
-export interface SignupRequest {
-  email: string;
-  password: string;
-  nickname: string;
-}
-
-export interface AuthResponse {
-  accessToken: string;
-}
-
-// 사용자 관련 타입
+// 용자 관련 타입
 export interface User {
   email: string;
   profileImage?: string;

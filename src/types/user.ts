@@ -1,4 +1,4 @@
-export type User = {
+export interface User {
   id: number;
   email: string;
   loginType: "BASIC" | "KAKAO" | "GOOGLE";
@@ -7,4 +7,4 @@ export type User = {
     nickname: string;
     profileImageUrl: string | null;
   };
-};
+}

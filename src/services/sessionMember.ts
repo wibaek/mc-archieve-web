@@ -1,25 +1,8 @@
-import type { SessionMember, SessionJoinRequest } from "@/types/session";
+import type { SessionJoinRequest } from "@/types/session";
 import axiosInstance from "./axios-config";
 import axios from "axios";
 
 export const sessionMember = {
-  // 세션 멤버 목록 조회
-  getSessionMembers: async (
-    sessionId: string
-  ): Promise<{ items: SessionMember[] }> => {
-    try {
-      const response = await axiosInstance.get<{ items: SessionMember[] }>(
-        `/v1/sessions/${sessionId}/members`
-      );
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
-        return error.response.data as { items: SessionMember[] };
-      }
-      throw error;
-    }
-  },
-
   // 세션 참가 요청 목록 조회
   getSessionJoinRequests: async (
     sessionId: string

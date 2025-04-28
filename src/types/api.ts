@@ -1,38 +1,3 @@
-// 페이지네이션 타입
-export interface PaginatedResponse<T> {
-  items: T[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-}
-
-// 용자 관련 타입
-export interface User {
-  email: string;
-  profileImage?: string;
-}
-
-export interface Profile {
-  nickname: string;
-  profileImageUrl: string;
-}
-
-export interface UserProfile extends User {
-  bio?: string;
-  postCount: number;
-  followerCount: number;
-  followingCount: number;
-}
-
-export interface UpdateProfileRequest {
-  username?: string;
-  email?: string;
-  password?: string;
-  profileImage?: string;
-  bio?: string;
-}
-
 // 세션 관련 타입
 export interface Session {
   id: string;

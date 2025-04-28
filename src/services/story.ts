@@ -33,3 +33,19 @@ export const getStory = async (storyId: string): Promise<Story> => {
     throw error;
   }
 };
+
+export const getStoriesBySession = async (
+  sessionId: number
+): Promise<Story[]> => {
+  try {
+    const response = await axiosInstance.get<Story[]>(
+      `/v1/sessions/${sessionId}/stories`
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      return error.response.data as Story[];
+    }
+    throw error;
+  }
+};

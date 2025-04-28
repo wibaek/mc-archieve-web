@@ -33,7 +33,9 @@ export default function SessionHeader({
           </CardTitle>
           <div className="flex items-center text-sm text-gray-500 mt-2">
             <Calendar className="h-4 w-4 mr-2" />
-            <span>생성일: {formatDate(session.startDate)}</span>
+            <span>
+              생성일: {session.startDate && formatDate(session.startDate)}
+            </span>
           </div>
         </div>
         <div className="flex space-x-2">

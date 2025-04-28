@@ -1,53 +1,4 @@
-// 페이지네이션 타입
-export interface PaginatedResponse<T> {
-  items: T[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-}
-
-// 인증 관련 타입
-export interface LoginRequest {
-  email: string;
-  password: string;
-}
-
-export interface SignupRequest {
-  email: string;
-  password: string;
-  nickname: string;
-}
-
-export interface AuthResponse {
-  accessToken: string;
-}
-
-// 사용자 관련 타입
-export interface User {
-  email: string;
-  profileImage?: string;
-}
-
-export interface Profile {
-  nickname: string;
-  profileImageUrl: string;
-}
-
-export interface UserProfile extends User {
-  bio?: string;
-  postCount: number;
-  followerCount: number;
-  followingCount: number;
-}
-
-export interface UpdateProfileRequest {
-  username?: string;
-  email?: string;
-  password?: string;
-  profileImage?: string;
-  bio?: string;
-}
+import { User } from "./user";
 
 // 세션 관련 타입
 export interface Session {
@@ -63,11 +14,6 @@ export interface Session {
 
 export interface CreateSessionRequest {
   name: string;
-  description?: string;
-}
-
-export interface UpdateSessionRequest {
-  name?: string;
   description?: string;
 }
 
@@ -100,53 +46,4 @@ export interface SessionJoinRequest {
   message?: string;
   createdAt: string;
   updatedAt: string;
-}
-
-// 게시물 관련 타입
-export interface Post {
-  id: string;
-  title: string;
-  description?: string;
-  imageUrl: string;
-  thumbnailUrl?: string;
-  userId: string;
-  user: User;
-  tags: string[];
-  likeCount: number;
-  commentCount: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface CreatePostRequest {
-  title: string;
-  description?: string;
-  image: File;
-  tags?: string[];
-}
-
-export interface UpdatePostRequest {
-  title?: string;
-  description?: string;
-  tags?: string[];
-}
-
-// 댓글 관련 타입
-export interface Comment {
-  id: string;
-  content: string;
-  postId: string;
-  userId: string;
-  user: User;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface CreateCommentRequest {
-  content: string;
-  postId: string;
-}
-
-export interface UpdateCommentRequest {
-  content: string;
 }

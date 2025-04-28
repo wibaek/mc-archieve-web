@@ -2,7 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { User } from "@/types/api";
+import { login, signup, logout } from "@/services/auth";
+import { getCurrentUser } from "@/services/user";
+import { hasToken, removeToken } from "@/services/token";
+import type { User } from "@/types/user";
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
@@ -14,31 +17,16 @@ export function useAuth() {
     const checkAuth = async () => {
       try {
         setLoading(true);
-        const token = localStorage.getItem("token");
-
-        if (!token) {
+        if (hasToken()) {
+          const userData = await getCurrentUser();
+          setUser(userData);
+        } else {
           setUser(null);
-          setLoading(false);
-          return;
         }
-
-        // TODO: API 연동 필요
-        // const userData = await apiClient.auth.getCurrentUser();
-        // if (userData.success) {
-        //   setUser(userData.data);
-        // } else {
-        //   setUser(null);
-        //   localStorage.removeItem("token");
-        // }
-
-        // 임시 사용자 데이터
-        setUser({
-          email: "temp@example.com",
-        });
       } catch (err) {
         setError("인증 확인 중 오류가 발생했습니다.");
         setUser(null);
-        localStorage.removeItem("token");
+        removeToken();
       } finally {
         setLoading(false);
       }
@@ -47,23 +35,15 @@ export function useAuth() {
     checkAuth();
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const handleLogin = async (email: string, password: string) => {
     try {
       setLoading(true);
-      // TODO: API 연동 필요
-      // const authData = await apiClient.auth.login({ email, password });
-      // setUser(authData.user);
-
-      // 임시 로그인 로직
-      if (email && password) {
-        setUser({
-          email: email,
-        });
-        localStorage.setItem("token", "temp-token");
-        return { success: true };
-      } else {
-        throw new Error("이메일과 비밀번호를 입력해주세요.");
-      }
+      setError(null);
+      await login({ email, password });
+      // 로그인 성공 후 사용자 정보 조회
+      const userData = await getCurrentUser();
+      setUser(userData);
+      return { success: true };
     } catch (err: any) {
       const errorMessage = err.message || "로그인 중 오류가 발생했습니다.";
       setError(errorMessage);
@@ -73,27 +53,18 @@ export function useAuth() {
     }
   };
 
-  const signup = async (email: string, password: string, nickname: string) => {
+  const handleSignup = async (
+    email: string,
+    password: string,
+    nickname: string
+  ) => {
     try {
       setLoading(true);
-      // TODO: API 연동 필요
-      // const authData = await apiClient.auth.signup({
-      //   email,
-      //   password,
-      //   nickname,
-      // });
-      // setUser(authData.user);
-
-      // 임시 회원가입 로직
-      if (email && password && nickname) {
-        setUser({
-          email: email,
-        });
-        localStorage.setItem("token", "temp-token");
-        return { success: true };
-      } else {
-        throw new Error("모든 필드를 입력해주세요.");
-      }
+      setError(null);
+      await signup({ email, password, nickname });
+      // 회원가입 성공 후 로그인 페이지로 리다이렉트
+      router.push("/login");
+      return { success: true };
     } catch (err: any) {
       const errorMessage = err.message || "회원가입 중 오류가 발생했습니다.";
       setError(errorMessage);
@@ -103,10 +74,8 @@ export function useAuth() {
     }
   };
 
-  const logout = () => {
-    // TODO: API 연동 필요
-    // apiClient.auth.logout();
-    localStorage.removeItem("token");
+  const handleLogout = () => {
+    logout();
     setUser(null);
     router.push("/login");
   };
@@ -115,9 +84,9 @@ export function useAuth() {
     user,
     loading,
     error,
-    login,
-    signup,
-    logout,
+    login: handleLogin,
+    signup: handleSignup,
+    logout: handleLogout,
     isAuthenticated: !!user,
   };
 }

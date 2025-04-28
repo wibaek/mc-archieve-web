@@ -2,7 +2,8 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Story } from "@/types/session";
+import { Story } from "@/types/story";
+
 import Image from "next/image";
 
 interface StoryGridProps {

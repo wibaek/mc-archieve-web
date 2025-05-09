@@ -1,10 +1,9 @@
 import { SessionDetailPage } from "./SessionDetailPage";
 
 interface PageProps {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }
 
-export default async function Page({ params }: PageProps) {
-  const { id } = await params;
-  return <SessionDetailPage id={id} />;
+export default function Page({ params }: PageProps) {
+  return <SessionDetailPage id={params.id} />;
 }

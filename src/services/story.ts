@@ -10,18 +10,23 @@ export const createStory = async (
 ): Promise<Story> => {
   try {
     const formData = new FormData();
-    formData.append("image", image);
+    formData.append("file", image);
     if (caption !== null) {
       formData.append("caption", caption);
     }
     const response = await axiosInstance.post<Story>(
       `/v1/sessions/${sessionId}/stories`,
-      formData
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
     );
     return response.data;
   } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      return error.response.data as Story;
+    if (axios.isAxiosError(error)) {
+      throw error;
     }
     throw error;
   }

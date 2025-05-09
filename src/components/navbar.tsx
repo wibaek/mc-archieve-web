@@ -37,12 +37,6 @@ export default function Navbar() {
           ) : isAuthenticated ? (
             <>
               <Link
-                href="/upload"
-                className="text-primary hover:text-primary-dark"
-              >
-                업로드
-              </Link>
-              <Link
                 href="/profile"
                 className="text-primary hover:text-primary-dark"
               >
@@ -98,12 +92,6 @@ export default function Navbar() {
                 </Button>
               ) : isAuthenticated ? (
                 <>
-                  <Link
-                    href="/upload"
-                    className="text-primary hover:text-primary-dark"
-                  >
-                    업로드
-                  </Link>
                   <Link
                     href="/profile"
                     className="text-primary hover:text-primary-dark"

@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/card";
 import { Loader2, ArrowLeft, LogIn } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
+import { createSession } from "@/services/session";
 
 export default function CreateSessionPage() {
   const [name, setName] = useState("");
@@ -52,14 +53,13 @@ export default function CreateSessionPage() {
     }
 
     try {
-      // TODO: API 연동 필요
-      // const response = await apiClient.sessions.createSession({
-      //   name,
-      //   description: description.trim() ? description : undefined,
-      // });
+      const response = await createSession({
+        name: name.trim(),
+        description: description.trim() || undefined,
+      });
 
-      // 임시 ID로 리다이렉트
-      router.push(`/sessions/temp-id`);
+      // 생성된 세션의 ID로 리다이렉트
+      router.push(`/sessions/${response.id}`);
     } catch (error) {
       console.error("Failed to create session:", error);
       setErrorMessage("세션 생성 중 오류가 발생했습니다.");

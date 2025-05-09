@@ -8,3 +8,8 @@ export interface Story {
     profileImageUrl: string | null;
   };
 }
+
+export interface StoryBulkResponse {
+  stories: Story[];
+  isSuccess: boolean;
+}

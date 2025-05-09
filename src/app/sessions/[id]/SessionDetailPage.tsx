@@ -1,37 +1,99 @@
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
+"use client";
+
+import { useState, useEffect } from "react";
+import { Loader2 } from "lucide-react";
+import { useAuth } from "@/contexts/auth-context";
 import SessionHeader from "./SessionHeader";
 import SessionTabs from "./SessionTabs";
 import { getSession } from "@/services/session";
 import { getStoriesBySession } from "@/services/story";
+import type { Session } from "@/types/session";
+import type { Story } from "@/types/story";
+import { StoryUploadForm } from "./StoryUploadForm";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { Upload } from "lucide-react";
 
 interface SessionDetailPageProps {
   id: string;
 }
 
-export async function SessionDetailPage({ id }: SessionDetailPageProps) {
-  const sessionData = await getSession(id);
-  const stories = await getStoriesBySession(parseInt(id, 10));
-  const isOwner = false; // TODO: 실제 소유자 확인 로직 구현
+export function SessionDetailPage({ id }: SessionDetailPageProps) {
+  const [session, setSession] = useState<Session | null>(null);
+  const [stories, setStories] = useState<Story[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { isAuthenticated } = useAuth();
+
+  const fetchStories = async () => {
+    try {
+      const storiesData = await getStoriesBySession(Number(id));
+      setStories(storiesData);
+    } catch (error) {
+      console.error("Failed to fetch stories:", error);
+    }
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [sessionData, storiesData] = await Promise.all([
+          getSession(id),
+          getStoriesBySession(Number(id)),
+        ]);
+        setSession(sessionData);
+        setStories(storiesData);
+      } catch (error) {
+        console.error("Failed to fetch session data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [id]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#F5F5F5] py-12 px-4">
+        <div className="container mx-auto max-w-3xl">
+          <div className="flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return (
+      <div className="min-h-screen bg-[#F5F5F5] py-12 px-4">
+        <div className="container mx-auto max-w-3xl">
+          <div className="text-center text-red-600">
+            세션을 찾을 수 없습니다.
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#F5F5F5] py-12 px-4">
-      <div className="container mx-auto max-w-4xl">
-        <Button asChild variant="ghost" className="mb-6">
-          <Link href="/sessions">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            세션 목록으로 돌아가기
-          </Link>
-        </Button>
-
-        <SessionHeader session={sessionData} isOwner={isOwner} />
-
+      <div className="container mx-auto max-w-3xl">
+        <SessionHeader session={session} isOwner={false} />
+        <div className="flex justify-end mb-6">
+          <Button asChild className="bg-[#33691E] hover:bg-[#1B5E20]">
+            <Link href={`/sessions/${id}/upload`}>
+              <Upload className="mr-2 h-4 w-4" />
+              스토리 업로드
+            </Link>
+          </Button>
+        </div>
+        <StoryUploadForm sessionId={id} onUploadSuccess={fetchStories} />
         <SessionTabs
-          session={sessionData}
+          session={session}
           stories={stories}
           storiesLoading={false}
-          isOwner={isOwner}
+          isOwner={false}
         />
       </div>
     </div>

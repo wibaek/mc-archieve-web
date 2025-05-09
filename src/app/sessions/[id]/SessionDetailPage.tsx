@@ -10,6 +10,9 @@ import { getStoriesBySession } from "@/services/story";
 import type { Session } from "@/types/session";
 import type { Story } from "@/types/story";
 import { StoryUploadForm } from "./StoryUploadForm";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { Upload } from "lucide-react";
 
 interface SessionDetailPageProps {
   id: string;
@@ -77,6 +80,14 @@ export function SessionDetailPage({ id }: SessionDetailPageProps) {
     <div className="min-h-screen bg-[#F5F5F5] py-12 px-4">
       <div className="container mx-auto max-w-3xl">
         <SessionHeader session={session} isOwner={false} />
+        <div className="flex justify-end mb-6">
+          <Button asChild className="bg-[#33691E] hover:bg-[#1B5E20]">
+            <Link href={`/sessions/${id}/upload`}>
+              <Upload className="mr-2 h-4 w-4" />
+              스토리 업로드
+            </Link>
+          </Button>
+        </div>
         <StoryUploadForm sessionId={id} onUploadSuccess={fetchStories} />
         <SessionTabs
           session={session}

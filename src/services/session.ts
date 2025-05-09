@@ -51,6 +51,7 @@ export const getSession = async (sessionId: string): Promise<Session> => {
 // 세션 생성
 export interface CreateSessionRequest {
   name: string;
+  description?: string;
 }
 
 export const createSession = async (

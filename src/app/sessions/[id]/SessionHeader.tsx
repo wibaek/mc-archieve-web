@@ -58,7 +58,7 @@ export default function SessionHeader({
       <CardContent>
         <div className="flex items-center text-sm text-gray-500">
           <div className="mt-2 text-sm text-gray-500">
-            <span>소유자: {session.owner.nickname}</span>
+            <span>소유자: {session.owner?.nickname || "알 수 없음"}</span>
           </div>
         </div>
       </CardContent>

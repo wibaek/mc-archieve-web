@@ -30,7 +30,7 @@ export function SessionDetailPage({ id }: SessionDetailPageProps) {
     try {
       const storiesData = await getStoriesBySession(Number(id));
       if (!("error" in storiesData)) {
-        setStories(storiesData);
+        setStories(storiesData as Story[]);
       }
     } catch (error) {
       console.error("Failed to fetch stories:", error);

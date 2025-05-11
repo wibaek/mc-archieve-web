@@ -1,6 +1,9 @@
 "use client";
 import { Users, BookOpen, Users2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { getStats } from "@/services/stat";
+import { Stats } from "@/types/stat";
+import { Loading } from "@/components/Loading";
 
 interface StatCardProps {
   title: string;
@@ -44,6 +47,43 @@ const StatCard = ({ title, value, icon, color }: StatCardProps) => {
 };
 
 export default function StatsSection() {
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await getStats();
+        if ("error" in response) {
+          setError(response.error as string);
+        } else {
+          setStats(response as Stats);
+        }
+      } catch (err) {
+        setError("통계 정보를 불러오는데 실패했습니다.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
+  if (isLoading) {
+    return <Loading />;
+  }
+
+  if (error) {
+    return (
+      <div className="py-12 bg-page">
+        <div className="container mx-auto px-4 text-center">
+          <p className="text-accent">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="py-12 bg-page">
       <div className="container mx-auto px-4">
@@ -58,19 +98,19 @@ export default function StatsSection() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <StatCard
             title="활성 세션"
-            value={3}
+            value={stats?.sessionCount || 0}
             icon={<BookOpen className="h-8 w-8 text-secondary" />}
             color="bg-secondary/10"
           />
           <StatCard
             title="스토리"
-            value={1562}
+            value={stats?.storyCount || 0}
             icon={<Users2 className="h-8 w-8 text-accent" />}
             color="bg-accent/10"
           />
           <StatCard
             title="활성 유저"
-            value={42}
+            value={stats?.userCount || 0}
             icon={<Users className="h-8 w-8 text-primary" />}
             color="bg-primary/10"
           />

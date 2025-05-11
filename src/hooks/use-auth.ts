@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { login, signup, logout } from "@/services/auth";
 import { getCurrentUser } from "@/services/user";
-import { hasToken, removeToken } from "@/utils/token";
+import { isTokenExist, removeToken } from "@/utils/token";
 import type { User } from "@/types/user";
 
 export function useAuth() {
@@ -17,7 +17,7 @@ export function useAuth() {
     const checkAuth = async () => {
       try {
         setLoading(true);
-        if (hasToken()) {
+        if (isTokenExist()) {
           const userData = await getCurrentUser();
           setUser(userData);
         } else {

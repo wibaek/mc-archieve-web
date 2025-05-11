@@ -20,6 +20,7 @@ import {
 import { Loader2, ArrowLeft, LogIn } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import { createSession } from "@/services/session";
+import { Session } from "@/types/session";
 
 export default function CreateSessionPage() {
   const [name, setName] = useState("");
@@ -53,10 +54,10 @@ export default function CreateSessionPage() {
     }
 
     try {
-      const response = await createSession({
+      const response = (await createSession({
         name: name.trim(),
         description: description.trim() || undefined,
-      });
+      })) as Session;
 
       // 생성된 세션의 ID로 리다이렉트
       router.push(`/sessions/${response.id}`);

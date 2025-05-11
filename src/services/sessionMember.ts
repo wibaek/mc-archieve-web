@@ -1,15 +1,15 @@
-import type { SessionJoinRequest } from "@/types/session";
 import { ErrorResponse } from "@/types/error";
 import { handleApiError } from "@/utils/error";
 import axiosInstance from "../utils/axios";
+import { SessionJoinApplication } from "@/types/sessionMember";
 
 // 세션 참가 요청 목록 조회
 export const getSessionJoinRequests = async (
   sessionId: string
-): Promise<{ items: SessionJoinRequest[] } | ErrorResponse> => {
+): Promise<{ items: SessionJoinApplication[] } | ErrorResponse> => {
   try {
     const response = await axiosInstance.get<{
-      applications: SessionJoinRequest[];
+      applications: SessionJoinApplication[];
     }>(`/v1/sessions/${sessionId}/join-applications`);
     return { items: response.data.applications };
   } catch (error) {
@@ -30,13 +30,10 @@ export const requestJoinSession = async (
 
 // 세션 참가 요청 승인
 export const acceptJoinRequest = async (
-  sessionId: string,
   applicationId: string
 ): Promise<void | ErrorResponse> => {
   try {
-    await axiosInstance.post(
-      `/v1/sessions/${sessionId}/join-applications/${applicationId}/approve`
-    );
+    await axiosInstance.post(`/v1/join-applications/${applicationId}/approve`);
   } catch (error) {
     return handleApiError(error);
   }
@@ -44,36 +41,10 @@ export const acceptJoinRequest = async (
 
 // 세션 참가 요청 거절
 export const rejectJoinRequest = async (
-  sessionId: string,
   applicationId: string
 ): Promise<void | ErrorResponse> => {
   try {
-    await axiosInstance.post(
-      `/v1/sessions/${sessionId}/join-applications/${applicationId}/reject`
-    );
-  } catch (error) {
-    return handleApiError(error);
-  }
-};
-
-// 멤버 제거 (소유자용)
-export const removeMember = async (
-  sessionId: string,
-  userId: string
-): Promise<void | ErrorResponse> => {
-  try {
-    await axiosInstance.delete(`/v1/sessions/${sessionId}/members/${userId}`);
-  } catch (error) {
-    return handleApiError(error);
-  }
-};
-
-// 세션 나가기 (멤버용)
-export const leaveSession = async (
-  sessionId: string
-): Promise<void | ErrorResponse> => {
-  try {
-    await axiosInstance.delete(`/v1/sessions/${sessionId}/leave`);
+    await axiosInstance.post(`/v1/join-applications/${applicationId}/reject`);
   } catch (error) {
     return handleApiError(error);
   }

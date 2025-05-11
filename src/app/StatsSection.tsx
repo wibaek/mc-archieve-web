@@ -56,7 +56,7 @@ export default function StatsSection() {
       try {
         const response = await getStats();
         if ("error" in response) {
-          setError(response.error);
+          setError(response.error as string);
         } else {
           setStats(response as Stats);
         }

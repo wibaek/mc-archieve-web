@@ -18,10 +18,11 @@ import { createStories } from "@/services/story";
 import Link from "next/link";
 
 interface PageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
-export default function StoryUploadPage({ params }: PageProps) {
+export default async function StoryUploadPage({ params }: PageProps) {
+  const { id } = await params;
   const router = useRouter();
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
@@ -69,9 +70,9 @@ export default function StoryUploadPage({ params }: PageProps) {
     }
 
     try {
-      await createStories(Number(params.id), images);
+      await createStories(Number(id), images);
       setSuccessMessage("스토리가 성공적으로 업로드되었습니다.");
-      router.push(`/sessions/${params.id}`);
+      router.push(`/sessions/${id}`);
     } catch (error: any) {
       console.error("Failed to upload stories:", error);
       if (error.response?.status === 403) {
@@ -88,7 +89,7 @@ export default function StoryUploadPage({ params }: PageProps) {
     <div className="min-h-screen bg-[#F5F5F5] py-12 px-4">
       <div className="container mx-auto max-w-3xl">
         <Button asChild variant="ghost" className="mb-6">
-          <Link href={`/sessions/${params.id}`}>
+          <Link href={`/sessions/${id}`}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             세션으로 돌아가기
           </Link>

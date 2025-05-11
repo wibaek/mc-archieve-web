@@ -26,7 +26,7 @@ export default function SessionsPage() {
     const fetchSessions = async () => {
       try {
         setLoading(true);
-        const response = await getSessions({ page: 1, limit: 10 });
+        const response = await getSessions();
         const sessionsData = Array.isArray(response) ? response : [];
         setSessions(sessionsData);
       } catch (error) {

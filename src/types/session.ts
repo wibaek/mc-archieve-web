@@ -1,5 +1,11 @@
 import { Profile } from "./user";
 
+// 세션 생성 요청
+export interface CreateSessionRequest {
+  name: string;
+  description?: string;
+}
+
 // 세션 멤버 역할
 export enum SessionMemberRole {
   OWNER = "OWNER",

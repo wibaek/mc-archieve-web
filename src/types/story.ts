@@ -1,4 +1,9 @@
-// 스토리 정보
+export interface StoryBulkResponse {
+  stories: Story[];
+  isSuccess: boolean;
+}
+
+// 스토리
 export interface Story {
   id: number;
   caption: string;
@@ -7,9 +12,4 @@ export interface Story {
     nickname: string;
     profileImageUrl: string | null;
   };
-}
-
-export interface StoryBulkResponse {
-  stories: Story[];
-  isSuccess: boolean;
 }

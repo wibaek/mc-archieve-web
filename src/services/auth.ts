@@ -1,31 +1,14 @@
-import axiosInstance from "./axios-config";
-import { setToken, removeToken } from "./token";
-import axios from "axios";
+import { LoginRequest, SignupRequest, SignupResponse } from "@/types/auth";
+import { LoginResponse } from "@/types/auth";
+import { ErrorResponse } from "@/types/error";
+import axiosInstance from "@/utils/axios";
+import { handleApiError } from "@/utils/error";
+import { setToken, removeToken } from "@/utils/token";
 
 // 로그인
-export interface LoginRequest {
-  email: string;
-  password: string;
-}
-
-export interface LoginResponse {
-  accessToken: string;
-}
-
-// 회원가입
-export interface SignupRequest {
-  email: string;
-  password: string;
-  nickname: string;
-}
-
-export interface SignupResponse {
-  nickname: string;
-  profileImageUrl: string | null;
-}
-
-// 로그인
-export const login = async (data: LoginRequest): Promise<LoginResponse> => {
+export const login = async (
+  data: LoginRequest
+): Promise<LoginResponse | ErrorResponse> => {
   try {
     const response = await axiosInstance.post<LoginResponse>(
       "/v1/auth/login",
@@ -39,27 +22,22 @@ export const login = async (data: LoginRequest): Promise<LoginResponse> => {
 
     return response.data;
   } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      return error.response.data as LoginResponse;
-    }
-    throw error;
+    return handleApiError(error);
   }
 };
 
 // 회원가입
-export const signup = async (data: SignupRequest): Promise<SignupResponse> => {
+export const signup = async (
+  data: SignupRequest
+): Promise<SignupResponse | ErrorResponse> => {
   try {
     const response = await axiosInstance.post<SignupResponse>(
       "/v1/auth/signup",
       data
     );
-
     return response.data;
   } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      return error.response.data as SignupResponse;
-    }
-    throw error;
+    return handleApiError(error);
   }
 };
 

@@ -4,7 +4,7 @@ import type React from "react";
 import { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getCurrentUser } from "@/services/user";
-import { hasToken, removeToken } from "@/services/token";
+import { hasToken, removeToken } from "@/utils/token";
 import type { User } from "@/types/user";
 import { login as authLogin, signup as authSignup } from "@/services/auth";
 

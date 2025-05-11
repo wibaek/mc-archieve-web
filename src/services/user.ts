@@ -1,5 +1,5 @@
 import type { User } from "@/types/user";
-import axiosInstance from "./axios-config";
+import axiosInstance from "../utils/axios";
 import axios from "axios";
 
 // 현재 사용자 정보 조회

@@ -4,7 +4,7 @@ import type React from "react";
 import { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getCurrentUser } from "@/services/user";
-import { hasToken, removeToken } from "@/services/token";
+import { isTokenExist, removeToken } from "@/utils/token";
 import type { User } from "@/types/user";
 import { login as authLogin, signup as authSignup } from "@/services/auth";
 
@@ -39,7 +39,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         setLoading(true);
         // 토큰이 있는지 확인
-        if (typeof window !== "undefined" && hasToken()) {
+        if (typeof window !== "undefined" && isTokenExist()) {
           const user = await getCurrentUser();
           setUser(user);
           setIsAuthenticated(true);

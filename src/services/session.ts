@@ -1,69 +1,51 @@
+import { CreateSessionRequest } from "@/types/api";
+import { ErrorResponse } from "@/types/error";
 import type { Session } from "@/types/session";
-import axiosInstance from "./axios-config";
-import axios from "axios";
+import { handleApiError } from "@/utils/error";
+import axiosInstance from "@/utils/axios";
 
 // 세션 목록 조회
-export const getSessions = async (params?: {
-  page?: number;
-  limit?: number;
-}): Promise<Session[]> => {
+export const getSessions = async (): Promise<Session[] | ErrorResponse> => {
   try {
-    const response = await axiosInstance.get<Session[]>("/v1/sessions", {
-      params,
-    });
+    const response = await axiosInstance.get<Session[]>("/v1/sessions");
     return response.data;
   } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      return error.response.data as Session[];
-    }
-    throw error;
+    return handleApiError(error);
   }
 };
 
 // 내 세션 목록 조회
-export const getMySessions = async (): Promise<Session[]> => {
+export const getMySessions = async (): Promise<Session[] | ErrorResponse> => {
   try {
     const response = await axiosInstance.get<Session[]>("/v1/sessions/my");
     return response.data;
   } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      return error.response.data as Session[];
-    }
-    throw error;
+    return handleApiError(error);
   }
 };
 
 // 세션 상세 조회
-export const getSession = async (sessionId: string): Promise<Session> => {
+export const getSession = async (
+  sessionId: string
+): Promise<Session | ErrorResponse> => {
   try {
     const response = await axiosInstance.get<Session>(
       `/v1/sessions/${sessionId}`
     );
     return response.data;
   } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      return error.response.data as Session;
-    }
-    throw error;
+    return handleApiError(error);
   }
 };
 
 // 세션 생성
-export interface CreateSessionRequest {
-  name: string;
-  description?: string;
-}
-
 export const createSession = async (
   data: CreateSessionRequest
-): Promise<Session> => {
+): Promise<Session | ErrorResponse> => {
   try {
     const response = await axiosInstance.post<Session>("/v1/sessions", data);
     return response.data;
   } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      return error.response.data as Session;
-    }
-    throw error;
+    return handleApiError(error);
   }
 };

@@ -44,7 +44,7 @@ export default function StoryGrid({ stories, loading }: StoryGridProps) {
             <div className="relative h-[200px] w-full mb-4">
               <Image
                 src={story.imageUrl}
-                alt={story.caption}
+                alt="스토리"
                 fill
                 className="object-cover rounded-md"
               />

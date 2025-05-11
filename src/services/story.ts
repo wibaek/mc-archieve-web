@@ -1,13 +1,14 @@
 import type { Story, StoryBulkResponse } from "@/types/story";
-import axiosInstance from "./axios-config";
-import axios from "axios";
+import { ErrorResponse } from "@/types/error";
+import { handleApiError } from "@/utils/error";
+import axiosInstance from "../utils/axios";
 
 // 스토리 생성
 export const createStory = async (
   sessionId: number,
   image: Blob,
   caption: string | null
-): Promise<Story> => {
+): Promise<Story | ErrorResponse> => {
   try {
     const formData = new FormData();
     formData.append("file", image);
@@ -25,10 +26,7 @@ export const createStory = async (
     );
     return response.data;
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      throw error;
-    }
-    throw error;
+    return handleApiError(error);
   }
 };
 
@@ -36,7 +34,7 @@ export const createStory = async (
 export const createStories = async (
   sessionId: number,
   images: Blob[]
-): Promise<StoryBulkResponse> => {
+): Promise<StoryBulkResponse | ErrorResponse> => {
   try {
     const formData = new FormData();
     images.forEach((image) => {
@@ -53,38 +51,32 @@ export const createStories = async (
     );
     return response.data;
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      throw error;
-    }
-    throw error;
+    return handleApiError(error);
   }
 };
 
 // 스토리 상세 조회
-export const getStory = async (storyId: string): Promise<Story> => {
+export const getStory = async (
+  storyId: string
+): Promise<Story | ErrorResponse> => {
   try {
     const response = await axiosInstance.get<Story>(`/v1/stories/${storyId}`);
     return response.data;
   } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      return error.response.data as Story;
-    }
-    throw error;
+    return handleApiError(error);
   }
 };
 
+// 세션별 스토리 조회
 export const getStoriesBySession = async (
   sessionId: number
-): Promise<Story[]> => {
+): Promise<Story[] | ErrorResponse> => {
   try {
     const response = await axiosInstance.get<Story[]>(
       `/v1/sessions/${sessionId}/stories`
     );
     return response.data;
   } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      return error.response.data as Story[];
-    }
-    throw error;
+    return handleApiError(error);
   }
 };

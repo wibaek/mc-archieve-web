@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import SessionHeader from "./SessionHeader";
 import SessionTabs from "./SessionTabs";
@@ -11,6 +10,7 @@ import type { Session } from "@/types/session";
 import type { Story } from "@/types/story";
 import { StoryUploadForm } from "./StoryUploadForm";
 import { Button } from "@/components/ui/button";
+import { Loading } from "@/components/Loading";
 import Link from "next/link";
 import { Upload } from "lucide-react";
 
@@ -22,12 +22,16 @@ export function SessionDetailPage({ id }: SessionDetailPageProps) {
   const [session, setSession] = useState<Session | null>(null);
   const [stories, setStories] = useState<Story[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+
+  const isOwner = false;
 
   const fetchStories = async () => {
     try {
       const storiesData = await getStoriesBySession(Number(id));
-      setStories(storiesData);
+      if (!("error" in storiesData)) {
+        setStories(storiesData);
+      }
     } catch (error) {
       console.error("Failed to fetch stories:", error);
     }
@@ -40,8 +44,13 @@ export function SessionDetailPage({ id }: SessionDetailPageProps) {
           getSession(id),
           getStoriesBySession(Number(id)),
         ]);
-        setSession(sessionData);
-        setStories(storiesData);
+
+        if (!("error" in sessionData)) {
+          setSession(sessionData as Session);
+        }
+        if (!("error" in storiesData)) {
+          setStories(storiesData as Story[]);
+        }
       } catch (error) {
         console.error("Failed to fetch session data:", error);
       } finally {
@@ -53,15 +62,7 @@ export function SessionDetailPage({ id }: SessionDetailPageProps) {
   }, [id]);
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-[#F5F5F5] py-12 px-4">
-        <div className="container mx-auto max-w-3xl">
-          <div className="flex items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-        </div>
-      </div>
-    );
+    return <Loading fullScreen size="lg" />;
   }
 
   if (!session) {
@@ -79,7 +80,7 @@ export function SessionDetailPage({ id }: SessionDetailPageProps) {
   return (
     <div className="min-h-screen bg-[#F5F5F5] py-12 px-4">
       <div className="container mx-auto max-w-3xl">
-        <SessionHeader session={session} isOwner={false} />
+        <SessionHeader session={session} isOwner={isOwner} />
         <div className="flex justify-end mb-6">
           <Button asChild className="bg-[#33691E] hover:bg-[#1B5E20]">
             <Link href={`/sessions/${id}/upload`}>
@@ -93,7 +94,7 @@ export function SessionDetailPage({ id }: SessionDetailPageProps) {
           session={session}
           stories={stories}
           storiesLoading={false}
-          isOwner={false}
+          isOwner={isOwner}
         />
       </div>
     </div>

@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Session } from "@/types/session";
 import StoryGrid from "./StoryGrid";
 import { Story } from "@/types/story";
+import SessionMemberList from "./SessionMemberList";
 
 interface SessionTabsProps {
   session: Session;
@@ -46,7 +47,11 @@ export default function SessionTabs({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-gray-500">멤버 목록이 여기에 표시됩니다.</p>
+            <SessionMemberList
+              sessionId={session.id}
+              isOwner={isOwner}
+              type="members"
+            />
           </CardContent>
         </Card>
       </TabsContent>
@@ -59,7 +64,11 @@ export default function SessionTabs({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-500">참가 요청이 여기에 표시됩니다.</p>
+              <SessionMemberList
+                sessionId={session.id}
+                isOwner={isOwner}
+                type="requests"
+              />
             </CardContent>
           </Card>
         </TabsContent>
